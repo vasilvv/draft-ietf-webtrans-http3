@@ -1,0 +1,770 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>WebTransport over HTTP/3</title>
+
+  
+<style type="text/css">/*<![CDATA[*/
+
+body {
+  font: 16px "Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif;
+  color: #333;
+  font-size-adjust: 0.5;
+  line-height: 24px;
+  margin: 75px auto;
+  max-width: 624px;
+  padding: 0 5px;
+}
+
+.title, .filename, h1, h2, h3, h4, h5 {
+  font: 16px "Roboto Condensed","Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif;
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  color: #333;
+  line-height: 100%;
+  margin: 1.2em 0 0.3em;
+}
+.title, #rfc\.title h1 { font-size: 32px; }
+h1, section h1, h2, section h2, section h3, nav h2 { font-size: 20px; }
+h3, section h4, h4, section h5 { font-size: 16px; }
+h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
+  color: #333;
+}
+
+table {
+  margin-left: 0em;
+  border-collapse: collapse;
+}
+th {
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+  vertical-align: top;
+}
+tr:nth-child(2n+1) > td,
+tr:nth-child(2n+1) > th {
+  background-color: #f9f9f9;
+}
+td.reference {
+  max-width: 200px;
+  border-top: none;
+  padding-right: 1em;
+}
+.right {
+  text-align: right;
+}
+
+
+table.header, table#rfc\.headerblock {
+  width: 100%;
+}
+table.header td, table#rfc\.headerblock td {
+  border: none;
+  background-color: transparent;
+  color: black;
+  padding: 0;
+}
+.filename {
+  display: block;
+  color: rgb(119, 119, 119);
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 100%;
+  margin: 10px 0 32px;
+}
+#rfc\.abstract+p, #rfc\.abstract p {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+samp, tt, code, pre, span.tt {
+  font: 13.5px Consolas, monospace;
+  font-size-adjust: none;
+}
+pre {
+  background-color: #eee;
+  border: 1px solid #ddd;
+  overflow-x: auto;
+  padding: 5px;
+  margin: 5px;
+}
+.figure, caption {
+  font-style: italic;
+  margin: 0 1.5em;
+  text-align: left;
+}
+
+address {
+  margin: 16px 2px;
+  line-height: 20px;
+}
+.vcard {
+  font-style: normal;
+}
+.vcardline {
+  display: block;
+}
+.vcardline .fn, address b {
+  font-weight: normal;
+}
+.vcardline .hidden {
+  display: none;
+}
+
+dl {
+  margin-left: 1em;
+}
+dl.dl-horizontal: {
+  margin-left: 0;
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.nohang > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .5em;
+}
+dl.compact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+ul.empty {
+  list-style-type: none;
+}
+ul.empty li {
+  margin-top: .5em;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+hr.noprint {
+  display: none;
+}
+
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #2a6496;
+}
+a[href]:hover {
+  background-color: #eee;
+}
+
+p, ol, ul, li {
+  padding: 0;
+}
+p {
+  margin: 0.5em 0;
+}
+ol, ul {
+  margin: 0.2em 0 0.2em 2em;
+}
+li {
+  margin: 0.2em 0;
+}
+address {
+  font-style: normal;
+}
+
+ul.toc ul {
+  margin: 0 0 0 2em;
+}
+ul.toc li {
+  list-style: none;
+  margin: 0;
+}
+
+@media screen and (min-width: 924px) {
+  body {
+    padding-right: 350px;
+  }
+  body>ul.toc, body>#rfc\.toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 500px);
+    width: 300px;
+    z-index: 1;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  body>#rfc\.toc {
+    top: 55px;
+  }
+  body>ul.toc {
+    top: 100px;
+  }
+
+  ul.toc {
+    margin: 0 0 0 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+  ul.toc ul {
+    margin-left: 1.2em;
+  }
+}
+
+.github-fork-ribbon-wrapper {
+  display: none;
+}
+@media screen and (min-width: 800px) {
+  /* "Fork me on GitHub" CSS ribbon based on
+   * https://github.com/simonwhitaker/github-fork-ribbon-css
+   */
+  .github-fork-ribbon {
+    position: absolute;
+    padding: 2px 0;
+    background-color: #a00;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.5);
+    font: 700 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    pointer-events: auto;
+
+    top: 38px;
+    right: -45px;
+
+    transform: rotate(45deg);
+  }
+
+  .github-fork-ribbon a[href],
+  .github-fork-ribbon a[href]:hover {
+    color: #fff;
+    background-color: transparent;
+    text-decoration: none;
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.5);
+    text-align: center;
+
+    width: 190px;
+    line-height: 18px;
+
+    display: inline-block;
+    padding: 2px 0;
+
+    border: 1.5px dotted #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .github-fork-ribbon-wrapper {
+    display: block;
+    width: 130px;
+    height: 130px;
+    position: absolute;
+    overflow: hidden;
+    top: 0; right: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+}
+@media screen and (min-width: 1000px) {
+  .github-fork-ribbon-wrapper {
+    position: fixed;
+  }
+  /*]]>*/</style>
+  <meta name="viewport" content="initial-scale=1.0">
+
+
+  <link href="#rfc.toc" rel="Contents">
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction">
+<link href="#rfc.section.1.1" rel="Chapter" title="1.1 Terminology">
+<link href="#rfc.section.2" rel="Chapter" title="2 Protocol Overview">
+<link href="#rfc.section.3" rel="Chapter" title="3 Session IDs">
+<link href="#rfc.section.4" rel="Chapter" title="4 Session Establishment">
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Establishing a Transport-Capable HTTP/3 Connection">
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 Extended CONNECT in HTTP/3">
+<link href="#rfc.section.4.3" rel="Chapter" title="4.3 Creating a New Session">
+<link href="#rfc.section.4.4" rel="Chapter" title="4.4 Limiting the Number of Simultaneous Sessions">
+<link href="#rfc.section.5" rel="Chapter" title="5 WebTransport Features">
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 Unidirectional streams">
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 Client-Initiated Bidirectional Streams">
+<link href="#rfc.section.5.3" rel="Chapter" title="5.3 Server-Initiated Bidirectional Streams">
+<link href="#rfc.section.5.4" rel="Chapter" title="5.4 Datagrams">
+<link href="#rfc.section.6" rel="Chapter" title="6 Session Termination">
+<link href="#rfc.section.7" rel="Chapter" title="7 Transport Properties">
+<link href="#rfc.section.8" rel="Chapter" title="8 Security Considerations">
+<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations">
+<link href="#rfc.section.9.1" rel="Chapter" title="9.1 Upgrade Token Registration">
+<link href="#rfc.section.9.2" rel="Chapter" title="9.2 QUIC Transport Parameter Registration">
+<link href="#rfc.section.9.3" rel="Chapter" title="9.3 Frame Type Registration">
+<link href="#rfc.section.9.4" rel="Chapter" title="9.4 Stream Type Registration">
+<link href="#rfc.references" rel="Chapter" title="10 References">
+<link href="#rfc.references.1" rel="Chapter" title="10.1 Normative References">
+<link href="#rfc.references.2" rel="Chapter" title="10.2 Informative References">
+<link href="#rfc.authors" rel="Chapter">
+
+
+  <meta name="generator" content="xml2rfc version 2.43.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Vasiliev, V." />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-vvv-webtransport-http3-latest" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-08" />
+  <meta name="dct.abstract" content="WebTransport  is a protocol framework that enables clients constrained by the Web security model to communicate with a remote server using a secure multiplexed transport.  This document describes a WebTransport protocol that is based on HTTP/3  and provides support for unidirectional streams, bidirectional streams and datagrams, all multiplexed within the same HTTP/3 connection. " />
+  <meta name="description" content="WebTransport  is a protocol framework that enables clients constrained by the Web security model to communicate with a remote server using a secure multiplexed transport.  This document describes a WebTransport protocol that is based on HTTP/3  and provides support for unidirectional streams, bidirectional streams and datagrams, all multiplexed within the same HTTP/3 connection. " />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+<td class="left">Network Working Group</td>
+<td class="right">V. Vasiliev</td>
+</tr>
+<tr>
+<td class="left">Internet-Draft</td>
+<td class="right">Google</td>
+</tr>
+<tr>
+<td class="left">Intended status: Standards Track</td>
+<td class="right">November 8, 2020</td>
+</tr>
+<tr>
+<td class="left">Expires: May 12, 2021</td>
+<td class="right"></td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">WebTransport over HTTP/3<br />
+  <span class="filename">draft-vvv-webtransport-http3-latest</span></p>
+  
+  <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
+<p>WebTransport <a href="#OVERVIEW" class="xref">[OVERVIEW]</a> is a protocol framework that enables clients constrained by the Web security model to communicate with a remote server using a secure multiplexed transport.  This document describes a WebTransport protocol that is based on HTTP/3 <a href="#HTTP3" class="xref">[HTTP3]</a> and provides support for unidirectional streams, bidirectional streams and datagrams, all multiplexed within the same HTTP/3 connection.</p>
+<h1><a>Note to Readers</a></h1>
+<p>Discussion of this draft takes place on the WebTransport mailing list (webtransport@ietf.org), which is archived at &lt;https://mailarchive.ietf.org/arch/search/?email_list=webtransport&gt;.</p>
+<p>The repository tracking the issues for this draft can be found at &lt;https://github.com/vasilvv/webtransport/issues&gt;.  The web API draft corresponding to this document can be found at &lt;https://w3c.github.io/webtransport/&gt;.</p>
+<h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on May 12, 2021.</p>
+<h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
+<p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a>
+</li>
+<ul><li>1.1.   <a href="#rfc.section.1.1">Terminology</a>
+</li>
+</ul><li>2.   <a href="#rfc.section.2">Protocol Overview</a>
+</li>
+<li>3.   <a href="#rfc.section.3">Session IDs</a>
+</li>
+<li>4.   <a href="#rfc.section.4">Session Establishment</a>
+</li>
+<ul><li>4.1.   <a href="#rfc.section.4.1">Establishing a Transport-Capable HTTP/3 Connection</a>
+</li>
+<li>4.2.   <a href="#rfc.section.4.2">Extended CONNECT in HTTP/3</a>
+</li>
+<li>4.3.   <a href="#rfc.section.4.3">Creating a New Session</a>
+</li>
+<li>4.4.   <a href="#rfc.section.4.4">Limiting the Number of Simultaneous Sessions</a>
+</li>
+</ul><li>5.   <a href="#rfc.section.5">WebTransport Features</a>
+</li>
+<ul><li>5.1.   <a href="#rfc.section.5.1">Unidirectional streams</a>
+</li>
+<li>5.2.   <a href="#rfc.section.5.2">Client-Initiated Bidirectional Streams</a>
+</li>
+<li>5.3.   <a href="#rfc.section.5.3">Server-Initiated Bidirectional Streams</a>
+</li>
+<li>5.4.   <a href="#rfc.section.5.4">Datagrams</a>
+</li>
+</ul><li>6.   <a href="#rfc.section.6">Session Termination</a>
+</li>
+<li>7.   <a href="#rfc.section.7">Transport Properties</a>
+</li>
+<li>8.   <a href="#rfc.section.8">Security Considerations</a>
+</li>
+<li>9.   <a href="#rfc.section.9">IANA Considerations</a>
+</li>
+<ul><li>9.1.   <a href="#rfc.section.9.1">Upgrade Token Registration</a>
+</li>
+<li>9.2.   <a href="#rfc.section.9.2">QUIC Transport Parameter Registration</a>
+</li>
+<li>9.3.   <a href="#rfc.section.9.3">Frame Type Registration</a>
+</li>
+<li>9.4.   <a href="#rfc.section.9.4">Stream Type Registration</a>
+</li>
+</ul><li>10.   <a href="#rfc.references">References</a>
+</li>
+<ul><li>10.1.   <a href="#rfc.references.1">Normative References</a>
+</li>
+<li>10.2.   <a href="#rfc.references.2">Informative References</a>
+</li>
+</ul><li><a href="#rfc.authors">Author's Address</a>
+</li>
+
+
+  </ul>
+
+  <h1 id="rfc.section.1">
+<a href="#rfc.section.1">1.</a> <a href="#introduction" id="introduction">Introduction</a>
+</h1>
+<p id="rfc.section.1.p.1">HTTP/3 <a href="#HTTP3" class="xref">[HTTP3]</a> is a protocol defined on top of QUIC <a href="#QUIC-TRANSPORT" class="xref">[QUIC-TRANSPORT]</a> that can multiplex HTTP requests over a QUIC connection.  This document defines a mechanism for multiplexing non-HTTP data with HTTP/3 in a manner that conforms with the WebTransport protocol requirements and semantics <a href="#OVERVIEW" class="xref">[OVERVIEW]</a>.  Using the mechanism described here, multiple WebTransport instances can be multiplexed simultaneously with regular HTTP traffic on the same HTTP/3 connection.</p>
+<h1 id="rfc.section.1.1">
+<a href="#rfc.section.1.1">1.1.</a> <a href="#terminology" id="terminology">Terminology</a>
+</h1>
+<p id="rfc.section.1.1.p.1">The keywords &#8220;MUST&#8221;, &#8220;MUST NOT&#8221;, &#8220;REQUIRED&#8221;, &#8220;SHALL&#8221;, &#8220;SHALL NOT&#8221;, &#8220;SHOULD&#8221;, &#8220;SHOULD NOT&#8221;, &#8220;RECOMMENDED&#8221;, &#8220;NOT RECOMMENDED&#8221;, &#8220;MAY&#8221;, and &#8220;OPTIONAL&#8221; in this document are to be interpreted as described in BCP 14 <a href="#RFC2119" class="xref">[RFC2119]</a> <a href="#RFC8174" class="xref">[RFC8174]</a> when, and only when, they appear in all capitals, as shown here.</p>
+<p id="rfc.section.1.1.p.2">This document follows terminology defined in Section 1.2 of <a href="#OVERVIEW" class="xref">[OVERVIEW]</a>.  Note that this document distinguishes between a WebTransport server and an HTTP/3 server.  An HTTP/3 server is the server that terminates HTTP/3 connections; a WebTransport server is an application that accepts WebTransport sessions, which can be accessed via an HTTP/3 server.</p>
+<h1 id="rfc.section.2">
+<a href="#rfc.section.2">2.</a> <a href="#protocol-overview" id="protocol-overview">Protocol Overview</a>
+</h1>
+<p id="rfc.section.2.p.1">WebTransport servers in general are identified by a pair of authority value and path value (defined in <a href="#RFC3986" class="xref">[RFC3986]</a> Sections 3.2 and 3.3 correspondingly).</p>
+<p id="rfc.section.2.p.2">When an HTTP/3 connection is established, the client and server have to negotiate a specific set of QUIC transport parameters that indicate support for various WebTransport features.  Most notably, the <samp>http3_transport_support</samp> parameter signals WebTransport support to the peer.</p>
+<p id="rfc.section.2.p.3">WebTransport sessions are initiated inside a given HTTP/3 connection by the client, who sends an extended CONNECT request <a href="#RFC8441" class="xref">[RFC8441]</a>.  If the server accepts the request, an WebTransport session is established.  As a part of this process, the client proposes, and the server confirms, a session ID.  A session ID (SID) is unique within a given HTTP/3 connection, and is used to associate all of the streams and datagrams with the specific session.</p>
+<p id="rfc.section.2.p.4">After the session is established, the peers can exchange data using the following mechanisms:</p>
+<p></p>
+
+<ul>
+<li>A client can create a bidirectional stream using a special indefinite-length HTTP/3 frame that transfers ownership of the stream to WebTransport.</li>
+<li>A server can create a bidirectional stream, which is possible since HTTP/3 does not define any semantics for server-initiated bidirectional streams.</li>
+<li>Both client and server can create a unidirectional stream using a special stream type.</li>
+<li>A datagram can be sent using a QUIC DATAGRAM frame <a href="#QUIC-DATAGRAM" class="xref">[QUIC-DATAGRAM]</a>.</li>
+</ul>
+<p id="rfc.section.2.p.6">An WebTransport session is terminated when the CONNECT stream that created it is closed.</p>
+<h1 id="rfc.section.3">
+<a href="#rfc.section.3">3.</a> <a href="#session-ids" id="session-ids">Session IDs</a>
+</h1>
+<p id="rfc.section.3.p.1">In order to allow multiple WebTransport sessions to occur within the same HTTP/3 connection, WebTransport assigns every session a unique ID, further referred to as session ID.  A session ID is a 62-bit number that is unique within the scope of an HTTP/3 connection, and is never reused even after the session is closed.  The client unilaterally picks the session ID.  As the IDs are encoded using QUIC variable length integers, the client SHOULD start with zero and then sequentially increment the IDs.  A session ID is considered to be used, and thus ineligible for new transports, as soon as the client sends a request proposing it.  These reuse requirements guarantee that both HTTP/3 endpoints have a consistent view of the session ID space.</p>
+<p id="rfc.section.3.p.2">The Session ID is a hop-by-hop property: if WebTransport is proxied, the same session can have different IDs from the client&#8217;s and server&#8217;s perspective.  Because of that, session IDs SHOULD NOT be exposed to the application.</p>
+<h1 id="rfc.section.4">
+<a href="#rfc.section.4">4.</a> <a href="#session-establishment" id="session-establishment">Session Establishment</a>
+</h1>
+<h1 id="rfc.section.4.1">
+<a href="#rfc.section.4.1">4.1.</a> <a href="#establishing-a-transport-capable-http3-connection" id="establishing-a-transport-capable-http3-connection">Establishing a Transport-Capable HTTP/3 Connection</a>
+</h1>
+<p id="rfc.section.4.1.p.1">In order to indicate support for WebTransport, both the client and server MUST send an empty <samp>http3_transport_support</samp> transport parameter.  Endpoints MUST NOT use any WebTransport-related functionality unless the parameter has been negotiated.  The negotiation is done through a QUIC transport parameter instead of an HTTP/3-level setting as it allows the server to customize the transport parameters it intends to send based on whether the client has indicated support for WebTransport.</p>
+<p id="rfc.section.4.1.p.2">If <samp>http3_transport_support</samp> is negotiated, support for the QUIC DATAGRAM extension MUST be negotiated.  The <samp>initial_max_bidi_streams</samp> MUST be greater than zero, overriding the existing requirement in <a href="#HTTP3" class="xref">[HTTP3]</a>.</p>
+<h1 id="rfc.section.4.2">
+<a href="#rfc.section.4.2">4.2.</a> <a href="#extended-connect-in-http3" id="extended-connect-in-http3">Extended CONNECT in HTTP/3</a>
+</h1>
+<p><a href="#RFC8441" class="xref">[RFC8441]</a> defines an extended CONNECT method in Section 4, enabled by the SETTINGS_ENABLE_CONNECT_PROTOCOL parameter.  That parameter is only defined for HTTP/2.  This document does not create a new multi-purpose parameter to indicate support for extended CONNECT in HTTP/3; instead, the <samp>http3_transport_support</samp> transport parameter implies that an endpoint supports extended CONNECT.</p>
+<h1 id="rfc.section.4.3">
+<a href="#rfc.section.4.3">4.3.</a> <a href="#creating-a-new-session" id="creating-a-new-session">Creating a New Session</a>
+</h1>
+<p id="rfc.section.4.3.p.1">As WebTransport sessions are established over HTTP/3, they are identified using the <samp>https</samp> URI scheme <a href="#RFC7230" class="xref">[RFC7230]</a>.</p>
+<p id="rfc.section.4.3.p.2">In order to create a new WebTransport session, a client can send an HTTP CONNECT request.  The <samp>:protocol</samp> pseudo-header field MUST be set to <samp>webtransport</samp>.  The <samp>:scheme</samp> field MUST be <samp>https</samp>.  Both the <samp>:authority</samp> and the <samp>:path</samp> value MUST be set; those fields indicate the desired WebTransport server.  The client MUST pick a new session ID as described in <a href="#session-ids" class="xref">Section 3</a> and send it encoded as a hexadecimal literal in <samp>:sessionid</samp> header.  An <samp>Origin</samp> header <a href="#RFC6454" class="xref">[RFC6454]</a> MUST be provided within the request.</p>
+<p id="rfc.section.4.3.p.3">Upon receiving an extended CONNECT request with a <samp>:protocol</samp> field set to <samp>:webtransport</samp>, the HTTP/3 server can check if it has a WebTransport server associated with the specified <samp>:authority</samp> and <samp>:path</samp> values.  If it does not, it SHOULD reply with status code 404 (Section 6.5.4, <a href="#RFC7231" class="xref">[RFC7231]</a>).  If it does, it MAY accept the session by replying with status code 200.  Before accepting it, the HTTP/3 server MUST verify that the proposed session ID does not conflict with any currently open sessions, and it MAY verify that it was not used ever before on this connection.  The WebTransport server MUST verify the <samp>Origin</samp> header to ensure that the specified origin is allowed to access the server in question.</p>
+<p id="rfc.section.4.3.p.4">From the client&#8217;s perspective, a WebTransport session is established when the client receives a 200 response.  From the server&#8217;s perspective, a session is established once it sends a 200 response.  Both endpoints MUST NOT open any streams or send any datagrams on a given session before that session is established.  WebTransport over HTTP/3 does not support 0-RTT.</p>
+<h1 id="rfc.section.4.4">
+<a href="#rfc.section.4.4">4.4.</a> <a href="#limiting-the-number-of-simultaneous-sessions" id="limiting-the-number-of-simultaneous-sessions">Limiting the Number of Simultaneous Sessions</a>
+</h1>
+<p id="rfc.section.4.4.p.1">From the flow control perspective, WebTransport sessions count against the stream flow control just like regular HTTP requests, since they are established via an HTTP CONNECT request.  This document does not make any effort to introduce a separate flow control mechanism for sessions, nor to separate HTTP requests from WebTransport data streams.  If the server needs to limit the rate of incoming requests, it has alternative mechanisms at its disposal:</p>
+<p></p>
+
+<ul>
+<li>
+<samp>HTTP_REQUEST_REJECTED</samp> error code defined in <a href="#HTTP3" class="xref">[HTTP3]</a> indicates to the receiving HTTP/3 stack that the request was not processed in any way.</li>
+<li>HTTP status code 429 indicates that the request was rejected due to rate limiting <a href="#RFC6585" class="xref">[RFC6585]</a>.  Unlike the previous method, this signal is directly propagated to the application.</li>
+</ul>
+<h1 id="rfc.section.5">
+<a href="#rfc.section.5">5.</a> <a href="#webtransport-features" id="webtransport-features">WebTransport Features</a>
+</h1>
+<p id="rfc.section.5.p.1">WebTransport over HTTP/3 provides the following features described in <a href="#OVERVIEW" class="xref">[OVERVIEW]</a>: unidirectional streams, bidirectional streams and datagrams, initiated by either endpoint.</p>
+<p id="rfc.section.5.p.2">Session IDs are used to demultiplex streams and datagrams belonging to different WebTransport sessions.  On the wire, session IDs are encoded using the QUIC variable length integer scheme described in <a href="#QUIC-TRANSPORT" class="xref">[QUIC-TRANSPORT]</a>.</p>
+<h1 id="rfc.section.5.1">
+<a href="#rfc.section.5.1">5.1.</a> <a href="#unidirectional-streams" id="unidirectional-streams">Unidirectional streams</a>
+</h1>
+<p id="rfc.section.5.1.p.1">Once established, both endpoints can open unidirectional streams.  The HTTP/3 control stream type SHALL be 0x54.  The body of the stream SHALL be the stream type, followed by the session ID, encoded as a variable-length integer, followed by the user-specified stream data (<a href="#fig-unidi" class="xref">Figure 1</a>).</p>
+<div id="rfc.figure.1"></div>
+<div id="fig-unidi"></div>
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                           0x54 (i)                          ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Session ID (i)                       ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                         Stream Body                         ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 1: Unidirectional WebTransport stream format</p>
+<h1 id="rfc.section.5.2">
+<a href="#rfc.section.5.2">5.2.</a> <a href="#client-initiated-bidirectional-streams" id="client-initiated-bidirectional-streams">Client-Initiated Bidirectional Streams</a>
+</h1>
+<p id="rfc.section.5.2.p.1">WebTransport clients can initiate bidirectional streams by opening an HTTP/3 bidirectional stream and sending an HTTP/3 frame with type <samp>WEBTRANSPORT_STREAM</samp> (type=0x41).  The format of the frame SHALL be the frame type, followed by the session ID, encoded as a variable-length integer, followed by the user-specified stream data (<a href="#fig-bidi-client" class="xref">Figure 2</a>).  The frame SHALL last until the end of the stream.</p>
+<div id="rfc.figure.2"></div>
+<div id="fig-bidi-client"></div>
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                           0x41 (i)                          ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Session ID (i)                       ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                         Stream Body                         ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 2: WEBTRANSPORT_STREAM frame format</p>
+<h1 id="rfc.section.5.3">
+<a href="#rfc.section.5.3">5.3.</a> <a href="#server-initiated-bidirectional-streams" id="server-initiated-bidirectional-streams">Server-Initiated Bidirectional Streams</a>
+</h1>
+<p id="rfc.section.5.3.p.1">WebTransport servers can initiate bidirectional streams by opening a bidirectional stream within the HTTP/3 connection.  Note that since HTTP/3 does not define any semantics for server-initiated bidirectional streams, this document is a normative reference for the semantics of such streams for all HTTP/3 connections in which the <samp>http3_transport_support</samp> option is negotiated.  The format of those streams SHALL be the session ID, encoded as a variable-length integer, followed by the user-specified stream data (<a href="#fig-bidi-server" class="xref">Figure 3</a>).</p>
+<div id="rfc.figure.3"></div>
+<div id="fig-bidi-server"></div>
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Session ID (i)                       ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                         Stream Body                         ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 3: Server-initiated bidirectional stream format</p>
+<h1 id="rfc.section.5.4">
+<a href="#rfc.section.5.4">5.4.</a> <a href="#datagrams" id="datagrams">Datagrams</a>
+</h1>
+<p id="rfc.section.5.4.p.1">Datagrams can be sent using the DATAGRAM frame as defined in <a href="#QUIC-DATAGRAM" class="xref">[QUIC-DATAGRAM]</a> and <a href="#H3-DATAGRAM" class="xref">[H3-DATAGRAM]</a>.  For all HTTP/3 connections in which the <samp>http3_transport_support</samp> option is negotiated, the Flow Identifier is set to the session ID.  In other words, the format of datagrams SHALL be the session ID, followed by the user-specified payload (<a href="#fig-datagram" class="xref">Figure 4</a>).</p>
+<div id="rfc.figure.4"></div>
+<div id="fig-datagram"></div>
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Session ID (i)                       ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Datagram Body                        ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 4: Datagram format</p>
+<p id="rfc.section.5.4.p.2">In QUIC, a datagram frame can span at most one packet.  Because of that, the applications have to know the maximum size of the datagram they can send.  However, when proxying the datagrams, the hop-by-hop MTUs can vary.  TODO: Describe how the path MTU can be computed, specifically propagation across HTTP proxies.</p>
+<h1 id="rfc.section.6">
+<a href="#rfc.section.6">6.</a> <a href="#session-termination" id="session-termination">Session Termination</a>
+</h1>
+<p id="rfc.section.6.p.1">An WebTransport session over HTTP/3 is terminated when either endpoint closes the stream associated with the CONNECT request that initiated the session.  Upon learning about the session being terminated, the endpoint MUST stop sending new datagrams and reset all of the streams associated with the session.</p>
+<h1 id="rfc.section.7">
+<a href="#rfc.section.7">7.</a> <a href="#transport-properties" id="transport-properties">Transport Properties</a>
+</h1>
+<p id="rfc.section.7.p.1">WebTransport over HTTP/3 supports most of the WebTransport features described in <a href="#properties" class="xref">Table 1</a>.</p>
+<div id="rfc.table.1"></div>
+<div id="properties"></div>
+<table cellpadding="3" cellspacing="0" class="tt full center">
+<caption>Transport properties of WebTransport over HTTP/3</caption>
+<thead><tr>
+<th class="left">Property</th>
+<th class="left">Support</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="left">Stream independence</td>
+<td class="left">Always supported</td>
+</tr>
+<tr>
+<td class="left">Partial reliability</td>
+<td class="left">Always supported</td>
+</tr>
+<tr>
+<td class="left">Pooling support</td>
+<td class="left">Always supported</td>
+</tr>
+<tr>
+<td class="left">Connection mobility</td>
+<td class="left">Implementation-dependent</td>
+</tr>
+</tbody>
+</table>
+<h1 id="rfc.section.8">
+<a href="#rfc.section.8">8.</a> <a href="#security-considerations" id="security-considerations">Security Considerations</a>
+</h1>
+<p id="rfc.section.8.p.1">WebTransport over HTTP/3 satisfies all of the security requirements imposed by <a href="#OVERVIEW" class="xref">[OVERVIEW]</a> on WebTransport protocols, thus providing a secure framework for client-server communication in cases when the client is potentially untrusted.  Since HTTP/3 is QUIC-based, a lot of the analysis in <a href="#WEBTRANSPORT-QUIC" class="xref">[WEBTRANSPORT-QUIC]</a> applies here.</p>
+<p id="rfc.section.8.p.2">WebTransport over HTTP/3 requires explicit opt-in through the use of a QUIC transport parameter; this avoids potential protocol confusion attacks by ensuring the HTTP/3 server explicitly supports it.  It also requires the use of the Origin header, providing the server with the ability to deny access to Web-based clients that do not originate from a trusted origin.</p>
+<p id="rfc.section.8.p.3">Just like HTTP traffic going over HTTP/3, WebTransport pools traffic to different origins within a single connection.  Different origins imply different trust domains, meaning that the implementations have to treat each transport as potentially hostile towards others on the same connection.  One potential attack is a resource exhaustion attack: since all of the transports share both congestion control and flow control context, a single client aggressively using up those resources can cause other transports to stall.  The user agent thus SHOULD implement a fairness scheme that ensures that each transport within connection gets a reasonable share of controlled resources; this applies both to sending data and to opening new streams.</p>
+<h1 id="rfc.section.9">
+<a href="#rfc.section.9">9.</a> <a href="#iana-considerations" id="iana-considerations">IANA Considerations</a>
+</h1>
+<h1 id="rfc.section.9.1">
+<a href="#rfc.section.9.1">9.1.</a> <a href="#upgrade-token-registration" id="upgrade-token-registration">Upgrade Token Registration</a>
+</h1>
+<p id="rfc.section.9.1.p.1">The following entry is added to the &#8220;Hypertext Transfer Protocol (HTTP) Upgrade Token Registry&#8221; registry established by <a href="#RFC7230" class="xref">[RFC7230]</a>:</p>
+<p id="rfc.section.9.1.p.2">The &#8220;webtransport&#8221; label identifies HTTP/3 used as a protocol for WebTransport:</p>
+<p></p>
+
+<dl>
+<dt>Value:</dt>
+<dd style="margin-left: 8">webtransport</dd>
+<dt>Description:</dt>
+<dd style="margin-left: 8">WebTransport over HTTP/3</dd>
+<dt>Reference:</dt>
+<dd style="margin-left: 8">This document</dd>
+</dl>
+<h1 id="rfc.section.9.2">
+<a href="#rfc.section.9.2">9.2.</a> <a href="#quic-transport-parameter-registration" id="quic-transport-parameter-registration">QUIC Transport Parameter Registration</a>
+</h1>
+<p id="rfc.section.9.2.p.1">The following entry is added to the &#8220;QUIC Transport Parameter Registry&#8221; registry established by <a href="#QUIC-TRANSPORT" class="xref">[QUIC-TRANSPORT]</a>:</p>
+<p id="rfc.section.9.2.p.2">The <samp>http3_transport_support</samp> parameter indicates that the specified HTTP/3 connection is WebTransport-capable.</p>
+<p></p>
+
+<dl>
+<dt>Value:</dt>
+<dd style="margin-left: 8">0x????</dd>
+<dt>Parameter Name:</dt>
+<dd style="margin-left: 8">http3_transport_support</dd>
+<dt>Specification:</dt>
+<dd style="margin-left: 8">This document</dd>
+</dl>
+<h1 id="rfc.section.9.3">
+<a href="#rfc.section.9.3">9.3.</a> <a href="#frame-type-registration" id="frame-type-registration">Frame Type Registration</a>
+</h1>
+<p id="rfc.section.9.3.p.1">The following entry is added to the &#8220;HTTP/3 Frame Type&#8221; registry established by <a href="#HTTP3" class="xref">[HTTP3]</a>:</p>
+<p id="rfc.section.9.3.p.2">The <samp>WEBTRANSPORT_STREAM</samp> frame allows HTTP/3 client-initiated bidirectional streams to be used by WebTransport:</p>
+<p></p>
+
+<dl>
+<dt>Code:</dt>
+<dd style="margin-left: 8">0x54</dd>
+<dt>Frame Type:</dt>
+<dd style="margin-left: 8">WEBTRANSPORT_STREAM</dd>
+<dt>Specification:</dt>
+<dd style="margin-left: 8">This document</dd>
+</dl>
+<h1 id="rfc.section.9.4">
+<a href="#rfc.section.9.4">9.4.</a> <a href="#stream-type-registration" id="stream-type-registration">Stream Type Registration</a>
+</h1>
+<p id="rfc.section.9.4.p.1">The following entry is added to the &#8220;HTTP/3 Stream Type&#8221; registry established by <a href="#HTTP3" class="xref">[HTTP3]</a>:</p>
+<p id="rfc.section.9.4.p.2">The &#8220;WebTransport stream&#8221; type allows unidirectional streams to be used by WebTransport:</p>
+<p></p>
+
+<dl>
+<dt>Code:</dt>
+<dd style="margin-left: 8">0x41</dd>
+<dt>Stream Type:</dt>
+<dd style="margin-left: 8">WebTransport stream</dd>
+<dt>Specification:</dt>
+<dd style="margin-left: 8">This document</dd>
+<dt>Sender:</dt>
+<dd style="margin-left: 8">Both</dd>
+</dl>
+<h1 id="rfc.references">
+<a href="#rfc.references">10.</a> References</h1>
+<h1 id="rfc.references.1">
+<a href="#rfc.references.1">10.1.</a> Normative References</h1>
+<table><tbody>
+<tr>
+<td class="reference"><b id="H3-DATAGRAM">[H3-DATAGRAM]</b></td>
+<td class="top">
+<a>Schinazi, D.</a>, "<a href="https://tools.ietf.org/html/draft-schinazi-quic-h3-datagram-05">Using QUIC Datagrams with HTTP/3</a>", Internet-Draft draft-schinazi-quic-h3-datagram-05, October 2020.</td>
+</tr>
+<tr>
+<td class="reference"><b id="HTTP3">[HTTP3]</b></td>
+<td class="top">
+<a title="Akamai">Bishop, M.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-quic-http">Hypertext Transfer Protocol Version 3 (HTTP/3)</a>", Internet-Draft draft-ietf-quic-http</td>
+</tr>
+<tr>
+<td class="reference"><b id="OVERVIEW">[OVERVIEW]</b></td>
+<td class="top">
+<a title="Google">Vasiliev, V.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-webtrans-overview-latest">The WebTransport Protocol Framework</a>", Internet-Draft draft-ietf-webtrans-overview-latest</td>
+</tr>
+<tr>
+<td class="reference"><b id="QUIC-DATAGRAM">[QUIC-DATAGRAM]</b></td>
+<td class="top">
+<a title="Apple">Pauly, T.</a>, <a title="Apple">Kinnear, E.</a> and <a title="Google">D. Schinazi</a>, "<a href="https://tools.ietf.org/html/draft-pauly-quic-datagram">An Unreliable Datagram Extension to QUIC</a>", Internet-Draft draft-pauly-quic-datagram</td>
+</tr>
+<tr>
+<td class="reference"><b id="QUIC-TRANSPORT">[QUIC-TRANSPORT]</b></td>
+<td class="top">
+<a title="Fastly">Iyengar, J.</a> and <a title="Mozilla">M. Thomson</a>, "<a href="https://tools.ietf.org/html/draft-ietf-quic-transport">QUIC: A UDP-Based Multiplexed and Secure Transport</a>", Internet-Draft draft-ietf-quic-transport</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC2119">[RFC2119]</b></td>
+<td class="top">
+<a>Bradner, S.</a>, "<a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC3986">[RFC3986]</b></td>
+<td class="top">
+<a>Berners-Lee, T.</a>, <a>Fielding, R.</a> and <a>L. Masinter</a>, "<a href="https://tools.ietf.org/html/rfc3986">Uniform Resource Identifier (URI): Generic Syntax</a>", STD 66, RFC 3986, DOI 10.17487/RFC3986, January 2005.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC6454">[RFC6454]</b></td>
+<td class="top">
+<a>Barth, A.</a>, "<a href="https://tools.ietf.org/html/rfc6454">The Web Origin Concept</a>", RFC 6454, DOI 10.17487/RFC6454, December 2011.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC6585">[RFC6585]</b></td>
+<td class="top">
+<a>Nottingham, M.</a> and <a>R. Fielding</a>, "<a href="https://tools.ietf.org/html/rfc6585">Additional HTTP Status Codes</a>", RFC 6585, DOI 10.17487/RFC6585, April 2012.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC7230">[RFC7230]</b></td>
+<td class="top">
+<a>Fielding, R.</a> and <a>J. Reschke</a>, "<a href="https://tools.ietf.org/html/rfc7230">Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</a>", RFC 7230, DOI 10.17487/RFC7230, June 2014.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC7231">[RFC7231]</b></td>
+<td class="top">
+<a>Fielding, R.</a> and <a>J. Reschke</a>, "<a href="https://tools.ietf.org/html/rfc7231">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>", RFC 7231, DOI 10.17487/RFC7231, June 2014.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8174">[RFC8174]</b></td>
+<td class="top">
+<a>Leiba, B.</a>, "<a href="https://tools.ietf.org/html/rfc8174">Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</a>", BCP 14, RFC 8174, DOI 10.17487/RFC8174, May 2017.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8441">[RFC8441]</b></td>
+<td class="top">
+<a>McManus, P.</a>, "<a href="https://tools.ietf.org/html/rfc8441">Bootstrapping WebSockets with HTTP/2</a>", RFC 8441, DOI 10.17487/RFC8441, September 2018.</td>
+</tr>
+</tbody></table>
+<h1 id="rfc.references.2">
+<a href="#rfc.references.2">10.2.</a> Informative References</h1>
+<table><tbody><tr>
+<td class="reference"><b id="WEBTRANSPORT-QUIC">[WEBTRANSPORT-QUIC]</b></td>
+<td class="top">
+<a title="Google">Vasiliev, V.</a>, "<a href="https://tools.ietf.org/html/draft-vvv-webtransport-quic">WebTransport over QUIC</a>", Internet-Draft draft-vvv-webtransport-quic</td>
+</tr></tbody></table>
+<h1 id="rfc.authors"><a href="#rfc.authors">Author's Address</a></h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Victor Vasiliev</span> 
+	  <span class="n hidden">
+		<span class="family-name">Vasiliev</span>
+	  </span>
+	</span>
+	<span class="org vcardline">Google</span>
+	<span class="adr">
+	  
+	  <span class="vcardline">
+		<span class="locality"></span> 
+		<span class="region"></span>
+		<span class="code"></span>
+	  </span>
+	  <span class="country-name vcardline"></span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:vasilvv@google.com">vasilvv@google.com</a></span>
+
+  </address>
+</div>
+
+</body>
+</html>
