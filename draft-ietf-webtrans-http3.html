@@ -15,28 +15,26 @@ unidirectional streams, bidirectional streams and datagrams, all multiplexed
 within the same HTTP/3 connection. 
     " name="description">
 <meta content="xml2rfc 3.5.0" name="generator">
-<meta content="draft-vvv-webtransport-http3-latest" name="ietf.draft">
+<meta content="draft-ietf-webtrans-http3-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.5.0
     Python 3.8.7
     appdirs 1.4.4
     ConfigArgParse 1.2.3
-    google-i18n-address 2.3.2
+    google-i18n-address 2.4.0
     html5lib 1.1
-    intervaltree 3.0.2
+    intervaltree 3.1.0
     Jinja2 2.11.2
     kitchen 1.2.6
-    lxml 4.5.2
-    pycairo 1.16.2
+    lxml 4.6.2
     pycountry 20.7.3
     pyflakes 2.2.0
-    PyYAML 5.3.1
-    requests 2.24.0
-    setuptools 51.1.0
+    PyYAML 5.4.1
+    requests 2.25.1
+    setuptools 51.3.3
     six 1.15.0
-    WeasyPrint 51
 -->
-<link href="draft-vvv-webtransport-http3.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-ietf-webtrans-http3.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@import url('https://martinthomson.github.io/i-d-template/fonts.css');
 
@@ -47,7 +45,23 @@ html {
   --link-color: #2a6496;
   --highlight-color: #f9f9f9;
   --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
   --small-font-size: 14.5px;
+  scrollbar-color: #bbb #eee;
+}
+@media (prefers-color-scheme: dark) {
+html {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
 }
 body {
   max-width: 600px;
@@ -79,11 +93,11 @@ body {
 }
 h1, h2, h3 {
   font-size: 22px;
-  line-height: 26px;
+  line-height: 27px;
 }
 h4, h5, h6 {
-  font-size: 18px;
-  line-height: 22px;
+  font-size: 20px;
+  line-height: 24px;
 }
 
 /* general structure */
@@ -156,7 +170,7 @@ svg {
 /* lists */
 ol, ul {
   padding: 0;
-  margin: 0 0 1em 2em;
+  margin: 0 0 0.5em 2em;
 }
 ol ol, ul ul, ol ul, ul ol {
   margin-left: 1em;
@@ -239,6 +253,7 @@ img {
 }
 figure {
   margin: 0.5em 0;
+  padding: 0;
 }
 figure blockquote {
   margin: 0.8em 0.4em 0.4em;
@@ -263,10 +278,6 @@ figcaption, caption {
     display: inline-block;
     vertical-align: text-bottom;
     padding-bottom: 8px;
-  }
-  table {
-    display: inline-block;
-    overflow-x: auto;
   }
 }
 
@@ -329,7 +340,7 @@ thead+tbody > tr:nth-child(2n+1) > td {
 }
 table caption {
   margin: 0;
-  padding: 3px 1em;
+  padding: 3px 0 3px 1em;
 }
 table p {
   margin: 0;
@@ -338,17 +349,23 @@ table p {
 /* pilcrow */
 a.pilcrow {
   margin-left: 3px;
-  visibility: hidden;
+  opacity: 0.2;
   user-select: none;
 }
-a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href] { color: var(--pilcrow-weak); }
 a.pilcrow[href]:hover { text-decoration: none; }
-@media screen {
+@media not print {
   :hover > a.pilcrow {
-    visibility: visible;
+    opacity: 1;
   }
-  a.pilcrow:hover {
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
     background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
   }
 }
 
@@ -817,18 +834,18 @@ address div.right {
   font-size: 0.9em;
 }
 </style>
-<link href="rfc-local.css" rel="stylesheet" type="text/css">
+
 </head>
 <body>
 <table class="ears">
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">WebTransport-H3</td>
-<td class="right">January 2021</td>
+<td class="right">February 2021</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Vasiliev</td>
-<td class="center">Expires 31 July 2021</td>
+<td class="center">Expires 21 August 2021</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -838,15 +855,15 @@ address div.right {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">Network Working Group</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-vvv-webtransport-http3-latest</dd>
+<dd class="internet-draft">draft-ietf-webtrans-http3-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-01-27" class="published">27 January 2021</time>
+<time datetime="2021-02-17" class="published">17 February 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2021-07-31">31 July 2021</time></dd>
+<dd class="expires"><time datetime="2021-08-21">21 August 2021</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -874,8 +891,8 @@ within the same HTTP/3 connection.<a href="#section-abstract-1" class="pilcrow">
 (webtransport@ietf.org), which is archived at
 &lt;https://mailarchive.ietf.org/arch/search/?email_list=webtransport&gt;.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">The repository tracking the issues for this draft can be found at
-&lt;https://github.com/vasilvv/webtransport/issues&gt;.  The web API draft
-corresponding to this document can be found at
+&lt;https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues&gt;.  The
+web API draft corresponding to this document can be found at
 &lt;https://w3c.github.io/webtransport/&gt;.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
@@ -897,7 +914,7 @@ corresponding to this document can be found at
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 31 July 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 August 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -925,8 +942,8 @@ corresponding to this document can be found at
         <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
 <a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
         </h2>
-<nav class="toc"><ul class="compact toc ulEmpty">
-<li class="compact toc ulEmpty" id="section-toc.1-1.1">
+<nav class="toc"><ul class="ulEmpty toc compact">
+<li class="ulEmpty toc compact" id="section-toc.1-1.1">
             <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-toc.1-1.1.1" class="pilcrow">¶</a></p>
 <ul class="compact toc ulEmpty">
 <li class="compact toc ulEmpty" id="section-toc.1-1.1.2.1">
@@ -934,10 +951,10 @@ corresponding to this document can be found at
 </li>
             </ul>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.2">
+          <li class="ulEmpty toc compact" id="section-toc.1-1.2">
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="xref">2</a>.  <a href="#name-protocol-overview" class="xref">Protocol Overview</a><a href="#section-toc.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.3">
+          <li class="ulEmpty toc compact" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-session-establishment" class="xref">Session Establishment</a><a href="#section-toc.1-1.3.1" class="pilcrow">¶</a></p>
 <ul class="compact toc ulEmpty">
 <li class="compact toc ulEmpty" id="section-toc.1-1.3.2.1">
@@ -954,7 +971,7 @@ corresponding to this document can be found at
 </li>
             </ul>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.4">
+          <li class="ulEmpty toc compact" id="section-toc.1-1.4">
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-webtransport-features" class="xref">WebTransport Features</a><a href="#section-toc.1-1.4.1" class="pilcrow">¶</a></p>
 <ul class="compact toc ulEmpty">
 <li class="compact toc ulEmpty" id="section-toc.1-1.4.2.1">
@@ -971,45 +988,42 @@ corresponding to this document can be found at
 </li>
             </ul>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.5">
+          <li class="ulEmpty toc compact" id="section-toc.1-1.5">
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-session-termination" class="xref">Session Termination</a><a href="#section-toc.1-1.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-transport-properties" class="xref">Transport Properties</a><a href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
+          <li class="ulEmpty toc compact" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-toc.1-1.7.1" class="pilcrow">¶</a></p>
+          <li class="ulEmpty toc compact" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-toc.1-1.7.1" class="pilcrow">¶</a></p>
+<ul class="compact toc ulEmpty">
+<li class="compact toc ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-upgrade-token-registration" class="xref">Upgrade Token Registration</a><a href="#section-toc.1-1.7.2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-toc.1-1.8.1" class="pilcrow">¶</a></p>
+              <li class="compact toc ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-http-3-settings-parameter-r" class="xref">HTTP/3 SETTINGS Parameter Registration</a><a href="#section-toc.1-1.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="compact toc ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>.  <a href="#name-frame-type-registration" class="xref">Frame Type Registration</a><a href="#section-toc.1-1.7.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="compact toc ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="xref">7.4</a>.  <a href="#name-stream-type-registration" class="xref">Stream Type Registration</a><a href="#section-toc.1-1.7.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="ulEmpty toc compact" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-references" class="xref">References</a><a href="#section-toc.1-1.8.1" class="pilcrow">¶</a></p>
 <ul class="compact toc ulEmpty">
 <li class="compact toc ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>.  <a href="#name-upgrade-token-registration" class="xref">Upgrade Token Registration</a><a href="#section-toc.1-1.8.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-toc.1-1.8.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="compact toc ulEmpty" id="section-toc.1-1.8.2.2">
-                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>.  <a href="#name-http-3-settings-parameter-r" class="xref">HTTP/3 SETTINGS Parameter Registration</a><a href="#section-toc.1-1.8.2.2.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="compact toc ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="xref">8.3</a>.  <a href="#name-frame-type-registration" class="xref">Frame Type Registration</a><a href="#section-toc.1-1.8.2.3.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="compact toc ulEmpty" id="section-toc.1-1.8.2.4">
-                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="xref">8.4</a>.  <a href="#name-stream-type-registration" class="xref">Stream Type Registration</a><a href="#section-toc.1-1.8.2.4.1" class="pilcrow">¶</a></p>
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-toc.1-1.8.2.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-references" class="xref">References</a><a href="#section-toc.1-1.9.1" class="pilcrow">¶</a></p>
-<ul class="compact toc ulEmpty">
-<li class="compact toc ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="xref">9.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-toc.1-1.9.2.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="compact toc ulEmpty" id="section-toc.1-1.9.2.2">
-                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="xref">9.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-toc.1-1.9.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-</li>
-          <li class="compact toc ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#section-appendix.a" class="xref"></a><a href="#name-authors-address" class="xref">Author's Address</a><a href="#section-toc.1-1.10.1" class="pilcrow">¶</a></p>
+          <li class="ulEmpty toc compact" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-appendix.a" class="xref"></a><a href="#name-authors-address" class="xref">Author's Address</a><a href="#section-toc.1-1.9.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </nav>
@@ -1189,7 +1203,7 @@ variable length integer scheme described in <span>[<a href="#QUIC-TRANSPORT" cla
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-unidirectional-streams" class="section-name selfRef">Unidirectional streams</a>
         </h3>
 <p id="section-4.1-1">Once established, both endpoints can open unidirectional streams.  The HTTP/3
-control stream type SHALL be 0x54.  The body of the stream SHALL be the stream
+unidirectional stream type SHALL be 0x54.  The body of the stream SHALL be the stream
 type, followed by the session ID, encoded as a variable-length integer, followed
 by the user-specified stream data (<a href="#fig-unidi" class="xref">Figure 1</a>).<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <span id="name-unidirectional-webtransport"></span><div id="fig-unidi">
@@ -1324,61 +1338,20 @@ Upon learning about the session being terminated, the endpoint MUST stop
 sending new datagrams and reset all of the streams associated with the session.<a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="transport-properties">
-<section id="section-6">
-      <h2 id="name-transport-properties">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-transport-properties" class="section-name selfRef">Transport Properties</a>
-      </h2>
-<p id="section-6-1">WebTransport over HTTP/3 supports most of the WebTransport features described
-in <a href="#properties" class="xref">Table 1</a>.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<span id="name-transport-properties-of-web"></span><div id="properties">
-<table class="center" id="table-1">
-        <caption>
-<a href="#table-1" class="selfRef">Table 1</a>:
-<a href="#name-transport-properties-of-web" class="selfRef">Transport properties of WebTransport over HTTP/3</a>
-        </caption>
-<thead>
-          <tr>
-            <th class="text-left" rowspan="1" colspan="1">Property</th>
-            <th class="text-left" rowspan="1" colspan="1">Support</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">Stream independence</td>
-            <td class="text-left" rowspan="1" colspan="1">Always supported</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">Partial reliability</td>
-            <td class="text-left" rowspan="1" colspan="1">Always supported</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">Pooling support</td>
-            <td class="text-left" rowspan="1" colspan="1">Always supported</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">Connection mobility</td>
-            <td class="text-left" rowspan="1" colspan="1">Implementation-dependent</td>
-          </tr>
-        </tbody>
-      </table>
-</div>
-</section>
-</div>
 <div id="security-considerations">
-<section id="section-7">
+<section id="section-6">
       <h2 id="name-security-considerations">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-7-1">WebTransport over HTTP/3 satisfies all of the security requirements imposed by
+<p id="section-6-1">WebTransport over HTTP/3 satisfies all of the security requirements imposed by
 <span>[<a href="#OVERVIEW" class="xref">OVERVIEW</a>]</span> on WebTransport protocols, thus providing a secure framework for
-client-server communication in cases when the client is potentially untrusted.<a href="#section-7-1" class="pilcrow">¶</a></p>
-<p id="section-7-2">WebTransport over HTTP/3 requires explicit opt-in through the use of a QUIC
+client-server communication in cases when the client is potentially untrusted.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">WebTransport over HTTP/3 requires explicit opt-in through the use of a QUIC
 transport parameter; this avoids potential protocol confusion attacks by
 ensuring the HTTP/3 server explicitly supports it.  It also requires the use of
 the Origin header, providing the server with the ability to deny access to
-Web-based clients that do not originate from a trusted origin.<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3">Just like HTTP traffic going over HTTP/3, WebTransport pools traffic to different origins
+Web-based clients that do not originate from a trusted origin.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">Just like HTTP traffic going over HTTP/3, WebTransport pools traffic to different origins
 within a single connection.  Different origins imply different trust domains,
 meaning that the implementations have to treat each transport as potentially
 hostile towards others on the same connection.  One potential attack is a
@@ -1387,130 +1360,144 @@ control and flow control context, a single client aggressively using up those
 resources can cause other transports to stall.  The user agent thus SHOULD
 implement a fairness scheme that ensures that each transport within connection
 gets a reasonable share of controlled resources; this applies both to sending
-data and to opening new streams.<a href="#section-7-3" class="pilcrow">¶</a></p>
+data and to opening new streams.<a href="#section-6-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-8">
+<section id="section-7">
       <h2 id="name-iana-considerations">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <div id="upgrade-token-registration">
-<section id="section-8.1">
+<section id="section-7.1">
         <h3 id="name-upgrade-token-registration">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-upgrade-token-registration" class="section-name selfRef">Upgrade Token Registration</a>
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-upgrade-token-registration" class="section-name selfRef">Upgrade Token Registration</a>
         </h3>
-<p id="section-8.1-1">The following entry is added to the "Hypertext Transfer Protocol (HTTP) Upgrade
-Token Registry" registry established by <span>[<a href="#RFC7230" class="xref">RFC7230</a>]</span>:<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">The "webtransport" label identifies HTTP/3 used as a protocol for WebTransport:<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-8.1-3">
-          <dt id="section-8.1-3.1">Value:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.1-3.2">
-  webtransport<a href="#section-8.1-3.2" class="pilcrow">¶</a>
+<p id="section-7.1-1">The following entry is added to the "Hypertext Transfer Protocol (HTTP) Upgrade
+Token Registry" registry established by <span>[<a href="#RFC7230" class="xref">RFC7230</a>]</span>:<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">The "webtransport" label identifies HTTP/3 used as a protocol for WebTransport:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7.1-3">
+          <dt id="section-7.1-3.1">
+Value:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.1-3.2">
+            <p id="section-7.1-3.2.1">webtransport<a href="#section-7.1-3.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.1-3.3">Description:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.1-3.4">
-  WebTransport over HTTP/3<a href="#section-8.1-3.4" class="pilcrow">¶</a>
+<dt id="section-7.1-3.3">
+Description:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.1-3.4">
+            <p id="section-7.1-3.4.1">WebTransport over HTTP/3<a href="#section-7.1-3.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.1-3.5">Reference:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.1-3.6">
-  This document and <span>[<a href="#I-D.kinnear-webtransport-http2" class="xref">I-D.kinnear-webtransport-http2</a>]</span><a href="#section-8.1-3.6" class="pilcrow">¶</a>
+<dt id="section-7.1-3.5">
+Reference:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.1-3.6">
+            <p id="section-7.1-3.6.1">This document and <span>[<a href="#I-D.kinnear-webtransport-http2" class="xref">I-D.kinnear-webtransport-http2</a>]</span><a href="#section-7.1-3.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="http3-settings-parameter-registration">
-<section id="section-8.2">
+<section id="section-7.2">
         <h3 id="name-http-3-settings-parameter-r">
-<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-http-3-settings-parameter-r" class="section-name selfRef">HTTP/3 SETTINGS Parameter Registration</a>
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-http-3-settings-parameter-r" class="section-name selfRef">HTTP/3 SETTINGS Parameter Registration</a>
         </h3>
-<p id="section-8.2-1">The following entry is added to the "HTTP/3 Settings" registry established by
-<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<p id="section-8.2-2">The <code>SETTINGS_ENABLE_WEBTRANSPORT</code> parameter indicates that the specified
-HTTP/3 connection is WebTransport-capable.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-8.2-3">
-          <dt id="section-8.2-3.1">Setting Name:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.2-3.2">
-  ENABLE_WEBTRANSPORT<a href="#section-8.2-3.2" class="pilcrow">¶</a>
+<p id="section-7.2-1">The following entry is added to the "HTTP/3 Settings" registry established by
+<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The <code>SETTINGS_ENABLE_WEBTRANSPORT</code> parameter indicates that the specified
+HTTP/3 connection is WebTransport-capable.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7.2-3">
+          <dt id="section-7.2-3.1">
+Setting Name:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.2-3.2">
+            <p id="section-7.2-3.2.1">ENABLE_WEBTRANSPORT<a href="#section-7.2-3.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.2-3.3">Value:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.2-3.4">
-  0x2b603742<a href="#section-8.2-3.4" class="pilcrow">¶</a>
+<dt id="section-7.2-3.3">
+Value:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.2-3.4">
+            <p id="section-7.2-3.4.1">0x2b603742<a href="#section-7.2-3.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.2-3.5">Default:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.2-3.6">
-  0<a href="#section-8.2-3.6" class="pilcrow">¶</a>
+<dt id="section-7.2-3.5">
+Default:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.2-3.6">
+            <p id="section-7.2-3.6.1">0<a href="#section-7.2-3.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.2-3.7">Specification:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.2-3.8">
-  This document<a href="#section-8.2-3.8" class="pilcrow">¶</a>
+<dt id="section-7.2-3.7">
+Specification:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.2-3.8">
+            <p id="section-7.2-3.8.1">This document<a href="#section-7.2-3.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="frame-type-registration">
-<section id="section-8.3">
+<section id="section-7.3">
         <h3 id="name-frame-type-registration">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-frame-type-registration" class="section-name selfRef">Frame Type Registration</a>
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-frame-type-registration" class="section-name selfRef">Frame Type Registration</a>
         </h3>
-<p id="section-8.3-1">The following entry is added to the "HTTP/3 Frame Type" registry established by
-<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<p id="section-8.3-2">The <code>WEBTRANSPORT_STREAM</code> frame allows HTTP/3 client-initiated bidirectional
-streams to be used by WebTransport:<a href="#section-8.3-2" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-8.3-3">
-          <dt id="section-8.3-3.1">Code:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.3-3.2">
-  0x54<a href="#section-8.3-3.2" class="pilcrow">¶</a>
+<p id="section-7.3-1">The following entry is added to the "HTTP/3 Frame Type" registry established by
+<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">The <code>WEBTRANSPORT_STREAM</code> frame allows HTTP/3 client-initiated bidirectional
+streams to be used by WebTransport:<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7.3-3">
+          <dt id="section-7.3-3.1">
+Code:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.3-3.2">
+            <p id="section-7.3-3.2.1">0x54<a href="#section-7.3-3.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.3-3.3">Frame Type:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.3-3.4">
-  WEBTRANSPORT_STREAM<a href="#section-8.3-3.4" class="pilcrow">¶</a>
+<dt id="section-7.3-3.3">
+Frame Type:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.3-3.4">
+            <p id="section-7.3-3.4.1">WEBTRANSPORT_STREAM<a href="#section-7.3-3.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.3-3.5">Specification:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.3-3.6">
-  This document<a href="#section-8.3-3.6" class="pilcrow">¶</a>
+<dt id="section-7.3-3.5">
+Specification:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.3-3.6">
+            <p id="section-7.3-3.6.1">This document<a href="#section-7.3-3.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="stream-type-registration">
-<section id="section-8.4">
+<section id="section-7.4">
         <h3 id="name-stream-type-registration">
-<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-stream-type-registration" class="section-name selfRef">Stream Type Registration</a>
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-stream-type-registration" class="section-name selfRef">Stream Type Registration</a>
         </h3>
-<p id="section-8.4-1">The following entry is added to the "HTTP/3 Stream Type" registry established by
-<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-8.4-1" class="pilcrow">¶</a></p>
-<p id="section-8.4-2">The "WebTransport stream" type allows unidirectional streams to be used by
-WebTransport:<a href="#section-8.4-2" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-8.4-3">
-          <dt id="section-8.4-3.1">Code:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.4-3.2">
-  0x41<a href="#section-8.4-3.2" class="pilcrow">¶</a>
+<p id="section-7.4-1">The following entry is added to the "HTTP/3 Stream Type" registry established by
+<span>[<a href="#HTTP3" class="xref">HTTP3</a>]</span>:<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-2">The "WebTransport stream" type allows unidirectional streams to be used by
+WebTransport:<a href="#section-7.4-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7.4-3">
+          <dt id="section-7.4-3.1">
+Code:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.4-3.2">
+            <p id="section-7.4-3.2.1">0x41<a href="#section-7.4-3.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.4-3.3">Stream Type:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.4-3.4">
-  WebTransport stream<a href="#section-8.4-3.4" class="pilcrow">¶</a>
+<dt id="section-7.4-3.3">
+Stream Type:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.4-3.4">
+            <p id="section-7.4-3.4.1">WebTransport stream<a href="#section-7.4-3.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.4-3.5">Specification:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.4-3.6">
-  This document<a href="#section-8.4-3.6" class="pilcrow">¶</a>
+<dt id="section-7.4-3.5">
+Specification:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.4-3.6">
+            <p id="section-7.4-3.6.1">This document<a href="#section-7.4-3.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-8.4-3.7">Sender:</dt>
-          <dd style="margin-left: 1.5em" id="section-8.4-3.8">
-  Both<a href="#section-8.4-3.8" class="pilcrow">¶</a>
+<dt id="section-7.4-3.7">
+Sender:  </dt>
+          <dd style="margin-left: 1.5em" id="section-7.4-3.8">
+            <p id="section-7.4-3.8.1">Both<a href="#section-7.4-3.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -1518,34 +1505,34 @@ WebTransport:<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
-<section id="section-9">
+<section id="section-8">
       <h2 id="name-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
-<section id="section-9.1">
+<section id="section-8.1">
         <h3 id="name-normative-references">
-<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="HTTP3">[HTTP3]</dt>
         <dd>
-<span class="refAuthor">Bishop, M., Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol Version 3 (HTTP/3)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-http</span>, <span>&lt;<a href="https://tools.ietf.org/html/draft-ietf-quic-http">https://tools.ietf.org/html/draft-ietf-quic-http</a>&gt;</span>. </dd>
+<span class="refAuthor">Bishop, M., Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol Version 3 (HTTP/3)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-http</span>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-http.txt">https://datatracker.ietf.org/doc/html/draft-ietf-quic-http.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="HTTP3-DATAGRAM">[HTTP3-DATAGRAM]</dt>
         <dd>
-<span class="refAuthor">Schinazi, D.</span><span class="refAuthor"> and L. Pardue</span>, <span class="refTitle">"Using QUIC Datagrams with HTTP/3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-schinazi-masque-h3-datagram-04</span>, <time datetime="2021-01-05" class="refDate">5 January 2021</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-schinazi-masque-h3-datagram-04.txt">http://www.ietf.org/internet-drafts/draft-schinazi-masque-h3-datagram-04.txt</a>&gt;</span>. </dd>
+<span class="refAuthor">Schinazi, D.</span><span class="refAuthor"> and L. Pardue</span>, <span class="refTitle">"Using QUIC Datagrams with HTTP/3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-schinazi-masque-h3-datagram-04</span>, <time datetime="2021-01-05" class="refDate">5 January 2021</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-schinazi-masque-h3-datagram-04.txt">https://www.ietf.org/archive/id/draft-schinazi-masque-h3-datagram-04.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="OVERVIEW">[OVERVIEW]</dt>
         <dd>
-<span class="refAuthor">Vasiliev, V.</span>, <span class="refTitle">"The WebTransport Protocol Framework"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-webtrans-overview-latest</span>, <span>&lt;<a href="https://tools.ietf.org/html/draft-ietf-webtrans-overview-latest">https://tools.ietf.org/html/draft-ietf-webtrans-overview-latest</a>&gt;</span>. </dd>
+<span class="refAuthor">Vasiliev, V.</span>, <span class="refTitle">"The WebTransport Protocol Framework"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-webtrans-overview-latest</span>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-overview-latest.txt">https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-overview-latest.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="QUIC-DATAGRAM">[QUIC-DATAGRAM]</dt>
         <dd>
-<span class="refAuthor">Pauly, T.</span><span class="refAuthor">, Kinnear, E.</span><span class="refAuthor">, and D. Schinazi</span>, <span class="refTitle">"An Unreliable Datagram Extension to QUIC"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-pauly-quic-datagram</span>, <span>&lt;<a href="https://tools.ietf.org/html/draft-pauly-quic-datagram">https://tools.ietf.org/html/draft-pauly-quic-datagram</a>&gt;</span>. </dd>
+<span class="refAuthor">Pauly, T.</span><span class="refAuthor">, Kinnear, E.</span><span class="refAuthor">, and D. Schinazi</span>, <span class="refTitle">"An Unreliable Datagram Extension to QUIC"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-pauly-quic-datagram</span>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-pauly-quic-datagram.txt">https://datatracker.ietf.org/doc/html/draft-pauly-quic-datagram.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="QUIC-TRANSPORT">[QUIC-TRANSPORT]</dt>
         <dd>
-<span class="refAuthor">Iyengar, J., Ed.</span><span class="refAuthor"> and M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-transport</span>, <span>&lt;<a href="https://tools.ietf.org/html/draft-ietf-quic-transport">https://tools.ietf.org/html/draft-ietf-quic-transport</a>&gt;</span>. </dd>
+<span class="refAuthor">Iyengar, J., Ed.</span><span class="refAuthor"> and M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-transport</span>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-transport.txt">https://datatracker.ietf.org/doc/html/draft-ietf-quic-transport.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -1581,14 +1568,14 @@ WebTransport:<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 <dd class="break"></dd>
 </dl>
 </section>
-<section id="section-9.2">
+<section id="section-8.2">
         <h3 id="name-informative-references">
-<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="I-D.kinnear-webtransport-http2">[I-D.kinnear-webtransport-http2]</dt>
       <dd>
-<span class="refAuthor">Frindell, A.</span><span class="refAuthor">, Kinnear, E.</span><span class="refAuthor">, Pauly, T.</span><span class="refAuthor">, Vasiliev, V.</span><span class="refAuthor">, and G. Xie</span>, <span class="refTitle">"WebTransport using HTTP/2"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-kinnear-webtransport-http2-01</span>, <time datetime="2020-07-13" class="refDate">13 July 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-kinnear-webtransport-http2-01.txt">http://www.ietf.org/internet-drafts/draft-kinnear-webtransport-http2-01.txt</a>&gt;</span>. </dd>
+<span class="refAuthor">Frindell, A.</span><span class="refAuthor">, Kinnear, E.</span><span class="refAuthor">, Pauly, T.</span><span class="refAuthor">, Vasiliev, V.</span><span class="refAuthor">, and G. Xie</span>, <span class="refTitle">"WebTransport using HTTP/2"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-kinnear-webtransport-http2-01</span>, <time datetime="2020-07-13" class="refDate">13 July 2020</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-kinnear-webtransport-http2-01.txt">https://www.ietf.org/archive/id/draft-kinnear-webtransport-http2-01.txt</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

@@ -4,12 +4,12 @@
 
 Network Working Group                                        V. Vasiliev
 Internet-Draft                                                    Google
-Intended status: Standards Track                         27 January 2021
-Expires: 31 July 2021
+Intended status: Standards Track                        17 February 2021
+Expires: 21 August 2021
 
 
                         WebTransport over HTTP/3
-                  draft-vvv-webtransport-http3-latest
+                    draft-ietf-webtrans-http3-latest
 
 Abstract
 
@@ -27,9 +27,9 @@ Note to Readers
    <https://mailarchive.ietf.org/arch/search/?email_list=webtransport>.
 
    The repository tracking the issues for this draft can be found at
-   <https://github.com/vasilvv/webtransport/issues>.  The web API draft
-   corresponding to this document can be found at
-   <https://w3c.github.io/webtransport/>.
+   <https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/
+   issues>.  The web API draft corresponding to this document can be
+   found at <https://w3c.github.io/webtransport/>.
 
 Status of This Memo
 
@@ -46,17 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 July 2021.
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 1]
-
-Internet-Draft               WebTransport-H3                January 2021
-
+   This Internet-Draft will expire on 21 August 2021.
 
 Copyright Notice
 
@@ -74,45 +64,30 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   3
-   2.  Protocol Overview . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  Session Establishment . . . . . . . . . . . . . . . . . . . .   4
-     3.1.  Establishing a Transport-Capable HTTP/3 Connection  . . .   4
-     3.2.  Extended CONNECT in HTTP/3  . . . . . . . . . . . . . . .   4
-     3.3.  Creating a New Session  . . . . . . . . . . . . . . . . .   5
-     3.4.  Limiting the Number of Simultaneous Sessions  . . . . . .   5
-   4.  WebTransport Features . . . . . . . . . . . . . . . . . . . .   6
-     4.1.  Unidirectional streams  . . . . . . . . . . . . . . . . .   6
-     4.2.  Client-Initiated Bidirectional Streams  . . . . . . . . .   6
-     4.3.  Server-Initiated Bidirectional Streams  . . . . . . . . .   7
-     4.4.  Datagrams . . . . . . . . . . . . . . . . . . . . . . . .   7
-   5.  Session Termination . . . . . . . . . . . . . . . . . . . . .   8
-   6.  Transport Properties  . . . . . . . . . . . . . . . . . . . .   8
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
-     8.1.  Upgrade Token Registration  . . . . . . . . . . . . . . .   9
-     8.2.  HTTP/3 SETTINGS Parameter Registration  . . . . . . . . .   9
-     8.3.  Frame Type Registration . . . . . . . . . . . . . . . . .  10
-     8.4.  Stream Type Registration  . . . . . . . . . . . . . . . .  10
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  10
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  12
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  12
-
-
-
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 2]
-
-Internet-Draft               WebTransport-H3                January 2021
-
+   1.  Introduction
+     1.1.  Terminology
+   2.  Protocol Overview
+   3.  Session Establishment
+     3.1.  Establishing a Transport-Capable HTTP/3 Connection
+     3.2.  Extended CONNECT in HTTP/3
+     3.3.  Creating a New Session
+     3.4.  Limiting the Number of Simultaneous Sessions
+   4.  WebTransport Features
+     4.1.  Unidirectional streams
+     4.2.  Client-Initiated Bidirectional Streams
+     4.3.  Server-Initiated Bidirectional Streams
+     4.4.  Datagrams
+   5.  Session Termination
+   6.  Security Considerations
+   7.  IANA Considerations
+     7.1.  Upgrade Token Registration
+     7.2.  HTTP/3 SETTINGS Parameter Registration
+     7.3.  Frame Type Registration
+     7.4.  Stream Type Registration
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
+   Author's Address
 
 1.  Introduction
 
@@ -162,14 +137,6 @@ Internet-Draft               WebTransport-H3                January 2021
    After the session is established, the peers can exchange data using
    the following mechanisms:
 
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 3]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
    *  A client can create a bidirectional stream using a special
       indefinite-length HTTP/3 frame that transfers ownership of the
       stream to WebTransport.
@@ -218,14 +185,6 @@ Internet-Draft               WebTransport-H3                January 2021
    instead, the SETTINGS_ENABLE_WEBTRANSPORT setting implies that an
    endpoint supports extended CONNECT.
 
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 4]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
 3.3.  Creating a New Session
 
    As WebTransport sessions are established over HTTP/3, they are
@@ -272,16 +231,6 @@ Internet-Draft               WebTransport-H3                January 2021
       to rate limiting [RFC6585].  Unlike the previous method, this
       signal is directly propagated to the application.
 
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 5]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
 4.  WebTransport Features
 
    WebTransport over HTTP/3 provides the following features described in
@@ -296,10 +245,10 @@ Internet-Draft               WebTransport-H3                January 2021
 4.1.  Unidirectional streams
 
    Once established, both endpoints can open unidirectional streams.
-   The HTTP/3 control stream type SHALL be 0x54.  The body of the stream
-   SHALL be the stream type, followed by the session ID, encoded as a
-   variable-length integer, followed by the user-specified stream data
-   (Figure 1).
+   The HTTP/3 unidirectional stream type SHALL be 0x54.  The body of the
+   stream SHALL be the stream type, followed by the session ID, encoded
+   as a variable-length integer, followed by the user-specified stream
+   data (Figure 1).
 
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -321,22 +270,6 @@ Internet-Draft               WebTransport-H3                January 2021
    the frame type, followed by the session ID, encoded as a variable-
    length integer, followed by the user-specified stream data
    (Figure 2).  The frame SHALL last until the end of the stream.
-
-
-
-
-
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 6]
-
-Internet-Draft               WebTransport-H3                January 2021
-
 
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -380,20 +313,6 @@ Internet-Draft               WebTransport-H3                January 2021
    datagrams SHALL be the session ID, followed by the user-specified
    payload (Figure 4).
 
-
-
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 7]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -418,39 +337,7 @@ Internet-Draft               WebTransport-H3                January 2021
    terminated, the endpoint MUST stop sending new datagrams and reset
    all of the streams associated with the session.
 
-6.  Transport Properties
-
-   WebTransport over HTTP/3 supports most of the WebTransport features
-   described in Table 1.
-
-            +=====================+==========================+
-            | Property            | Support                  |
-            +=====================+==========================+
-            | Stream independence | Always supported         |
-            +---------------------+--------------------------+
-            | Partial reliability | Always supported         |
-            +---------------------+--------------------------+
-            | Pooling support     | Always supported         |
-            +---------------------+--------------------------+
-            | Connection mobility | Implementation-dependent |
-            +---------------------+--------------------------+
-
-              Table 1: Transport properties of WebTransport
-                               over HTTP/3
-
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 8]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
-7.  Security Considerations
+6.  Security Considerations
 
    WebTransport over HTTP/3 satisfies all of the security requirements
    imposed by [OVERVIEW] on WebTransport protocols, thus providing a
@@ -476,9 +363,9 @@ Internet-Draft               WebTransport-H3                January 2021
    within connection gets a reasonable share of controlled resources;
    this applies both to sending data and to opening new streams.
 
-8.  IANA Considerations
+7.  IANA Considerations
 
-8.1.  Upgrade Token Registration
+7.1.  Upgrade Token Registration
 
    The following entry is added to the "Hypertext Transfer Protocol
    (HTTP) Upgrade Token Registry" registry established by [RFC7230]:
@@ -492,19 +379,10 @@ Internet-Draft               WebTransport-H3                January 2021
 
    Reference:  This document and [I-D.kinnear-webtransport-http2]
 
-8.2.  HTTP/3 SETTINGS Parameter Registration
+7.2.  HTTP/3 SETTINGS Parameter Registration
 
    The following entry is added to the "HTTP/3 Settings" registry
    established by [HTTP3]:
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                  [Page 9]
-
-Internet-Draft               WebTransport-H3                January 2021
-
 
    The "SETTINGS_ENABLE_WEBTRANSPORT" parameter indicates that the
    specified HTTP/3 connection is WebTransport-capable.
@@ -517,7 +395,7 @@ Internet-Draft               WebTransport-H3                January 2021
 
    Specification:  This document
 
-8.3.  Frame Type Registration
+7.3.  Frame Type Registration
 
    The following entry is added to the "HTTP/3 Frame Type" registry
    established by [HTTP3]:
@@ -531,7 +409,7 @@ Internet-Draft               WebTransport-H3                January 2021
 
    Specification:  This document
 
-8.4.  Stream Type Registration
+7.4.  Stream Type Registration
 
    The following entry is added to the "HTTP/3 Stream Type" registry
    established by [HTTP3]:
@@ -547,49 +425,40 @@ Internet-Draft               WebTransport-H3                January 2021
 
    Sender:  Both
 
-9.  References
+8.  References
 
-9.1.  Normative References
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                 [Page 10]
-
-Internet-Draft               WebTransport-H3                January 2021
-
+8.1.  Normative References
 
    [HTTP3]    Bishop, M., Ed., "Hypertext Transfer Protocol Version 3
               (HTTP/3)", Work in Progress, Internet-Draft, draft-ietf-
-              quic-http,
-              <https://tools.ietf.org/html/draft-ietf-quic-http>.
+              quic-http, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-quic-http.txt>.
 
    [HTTP3-DATAGRAM]
               Schinazi, D. and L. Pardue, "Using QUIC Datagrams with
               HTTP/3", Work in Progress, Internet-Draft, draft-schinazi-
               masque-h3-datagram-04, 5 January 2021,
-              <http://www.ietf.org/internet-drafts/draft-schinazi-
-              masque-h3-datagram-04.txt>.
+              <https://www.ietf.org/archive/id/draft-schinazi-masque-h3-
+              datagram-04.txt>.
 
    [OVERVIEW] Vasiliev, V., "The WebTransport Protocol Framework", Work
               in Progress, Internet-Draft, draft-ietf-webtrans-overview-
-              latest, <https://tools.ietf.org/html/draft-ietf-webtrans-
-              overview-latest>.
+              latest, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              webtrans-overview-latest.txt>.
 
    [QUIC-DATAGRAM]
               Pauly, T., Kinnear, E., and D. Schinazi, "An Unreliable
               Datagram Extension to QUIC", Work in Progress, Internet-
               Draft, draft-pauly-quic-datagram,
-              <https://tools.ietf.org/html/draft-pauly-quic-datagram>.
+              <https://datatracker.ietf.org/doc/html/draft-pauly-quic-
+              datagram.txt>.
 
    [QUIC-TRANSPORT]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", Work in Progress,
               Internet-Draft, draft-ietf-quic-transport,
-              <https://tools.ietf.org/html/draft-ietf-quic-transport>.
+              <https://datatracker.ietf.org/doc/html/draft-ietf-quic-
+              transport.txt>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -609,15 +478,6 @@ Internet-Draft               WebTransport-H3                January 2021
               Codes", RFC 6585, DOI 10.17487/RFC6585, April 2012,
               <https://www.rfc-editor.org/info/rfc6585>.
 
-
-
-
-
-Vasiliev                  Expires 31 July 2021                 [Page 11]
-
-Internet-Draft               WebTransport-H3                January 2021
-
-
    [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Message Syntax and Routing",
               RFC 7230, DOI 10.17487/RFC7230, June 2014,
@@ -636,14 +496,14 @@ Internet-Draft               WebTransport-H3                January 2021
               RFC 8441, DOI 10.17487/RFC8441, September 2018,
               <https://www.rfc-editor.org/info/rfc8441>.
 
-9.2.  Informative References
+8.2.  Informative References
 
    [I-D.kinnear-webtransport-http2]
               Frindell, A., Kinnear, E., Pauly, T., Vasiliev, V., and G.
               Xie, "WebTransport using HTTP/2", Work in Progress,
               Internet-Draft, draft-kinnear-webtransport-http2-01, 13
-              July 2020, <http://www.ietf.org/internet-drafts/draft-
-              kinnear-webtransport-http2-01.txt>.
+              July 2020, <https://www.ietf.org/archive/id/draft-kinnear-
+              webtransport-http2-01.txt>.
 
 Author's Address
 
@@ -651,22 +511,3 @@ Author's Address
    Google
 
    Email: vasilvv@google.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Vasiliev                  Expires 31 July 2021                 [Page 12]
