@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-02-18T00:33:47.956025+00:00",
+  "timestamp": "2021-02-21T00:35:14.352939+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -691,6 +691,22 @@
           "updatedAt": "2021-02-04T23:28:01Z"
         }
       ]
+    },
+    {
+      "number": 30,
+      "id": "MDU6SXNzdWU4MTI1MDYzNTc=",
+      "title": "Section 4.4: Path MTU computation",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/30",
+      "state": "OPEN",
+      "author": "aboba",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "From Section 4.4: \r\n\r\n\"TODO: Describe how the path MTU can be computed, specifically propagation across HTTP proxies.\"",
+      "createdAt": "2021-02-20T03:54:47Z",
+      "updatedAt": "2021-02-20T03:54:47Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
