@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-02-21T00:35:14.352939+00:00",
+  "timestamp": "2021-02-25T00:34:08.695312+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -707,6 +707,100 @@
       "updatedAt": "2021-02-20T03:54:47Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 31,
+      "id": "MDU6SXNzdWU4MTQwNzM0Mjg=",
+      "title": "Ambiguous RESET_STREAM",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/31",
+      "state": "OPEN",
+      "author": "kixelated",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "If a peer receives a RESET_STREAM message before it receives the first few bytes of the stream, then it is unable associate the RESET_STREAM with a protocol or session. This can occur if the STREAM packet is lost but the RESET_STREAM is not.\r\n\r\nAs a consequence, if a WebTransport client closes a stream with an error code, then it's not guaranteed to be received by the server. Worse yet, a reset client-initiated bidirectional stream may be confused for a HTTP/3 request and cause intended consequences.",
+      "createdAt": "2021-02-23T03:49:41Z",
+      "updatedAt": "2021-02-24T18:16:09Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "Can you give a more concrete example of when this is a problem?\r\n\r\nYou are saying the client opened a unidirectional or bidirectional WT stream, sent some data, then reset it.  The server receives only the reset, or some fraction of the data but not enough to figure out which session the stream belongs to.  I think this is fine and the server just discards any partial data on this stream.\r\n\r\nIf the application needs to receive the data (even just an error code) in the stream, then the client shouldn't reset it, but instead, send some application level close signal that is delivered reliably on the stream.\r\n\r\nI don't see how an H3 server could act on any stream data from the client without seeing the beginning of the stream, so I don't think there's much concern about this being served as an H3 request.",
+          "createdAt": "2021-02-23T16:37:50Z",
+          "updatedAt": "2021-02-23T16:37:50Z"
+        },
+        {
+          "author": "kixelated",
+          "authorAssociation": "NONE",
+          "body": "Sure. I suppose the problem is the reliable delivery of error codes. \r\n\r\nIf the application closes a stream with an integer code via the [WebTransport API](https://w3c.github.io/webtransport/#dom-outgoingstream-abortwriting), then I would expect that code to be reliably delivered to the other peer. This ambiguous RESET_STREAM case opens the possibility of the code not being associated with a WebTransport session, and thus not delivered, depending on packet loss.",
+          "createdAt": "2021-02-23T19:14:15Z",
+          "updatedAt": "2021-02-23T19:14:15Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "Iiuc the problem is if the stream is reset before the Web Transport frame is processed (as far the *current* spec says). That frame associates the stream to the web transport session. A peer that receives the RESET_STREAM know something was cancelled but not whether it was a normal request or a webtransport stream. \r\n\r\nThis highlights a challenge with retconning what bidirectional streams mean for a H3 stack. ",
+          "createdAt": "2021-02-23T19:23:23Z",
+          "updatedAt": "2021-02-23T19:23:23Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "I can construct an application where it's important that the peer knows about every stream that gets created, even if it is reset before anything interesting happens, but it strikes me as a bit fringy.  Can you give a concrete example where the WT endpoint missing the reset stream entirely is problematic?",
+          "createdAt": "2021-02-23T19:30:07Z",
+          "updatedAt": "2021-02-23T19:30:07Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "The only example I can think of relates to session pooling and wanting different concurrency limits in sessions. Since we decided to focus on single sessions for now, my example I'd moot. I'd be interested to know Luke's example ",
+          "createdAt": "2021-02-23T19:38:44Z",
+          "updatedAt": "2021-02-23T19:38:44Z"
+        },
+        {
+          "author": "kixelated",
+          "authorAssociation": "NONE",
+          "body": "> I can construct an application where it's important that the peer knows about every stream that gets created, even if it is reset before anything interesting happens, but it strikes me as a bit fringy. Can you give a concrete example where the WT endpoint missing the reset stream entirely is problematic?\r\n\r\nIronically, the best example is an application implementing a replacement for MAX_STREAMS. Peers can't set a cumulative limit if they disagree on the number of streams created. ex. peer A creates and resets a stream, so it thinks 10 have been created in total, but packet loss could cause peer B to think only 9 have been created in total. This can eventually cause a deadlock.\r\n\r\nAnd yeah, it's pretty easy to imagine an application that uses stream resets. The WebTransport API makes stream closure seem reliable, when really there's a small chance that it gets silently dropped.",
+          "createdAt": "2021-02-23T23:15:01Z",
+          "updatedAt": "2021-02-23T23:16:03Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "This seems like another case of where a \"session layer\" over QUIC would assist. The trouble is, in my limited understanding of the W3C WebTransport API, that it wants to use a QUIC transport feature to manage WebTransport sessions. It is going to be let down by the fact the transport behaves differently than it wishes. \r\n\r\ndraft-ietf-webtrans-http3-00 defines the WEBTRANSPORT_STREAM HTTP/3 frame for initiating WebTransport streams. So it probably needs an equivalent frame for closing WebTransport streams. This could be sent on the stream itself, on a new \"webtransport session control stream\", or on the global control stream.",
+          "createdAt": "2021-02-24T00:15:52Z",
+          "updatedAt": "2021-02-24T00:15:52Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "> This could be sent on the stream itself, on a new \"webtransport session control stream\", or on the global control stream.\r\n\r\nBy 'on the stream itself', do you mean on the CONNECT stream that established the session?  The current draft disables framing on WT streams.  It could be a message like QPACK, where streams that are cancelled have an application level signal.",
+          "createdAt": "2021-02-24T17:00:32Z",
+          "updatedAt": "2021-02-24T17:00:32Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "> By 'on the stream itself', do you mean on the CONNECT stream that established the session?\r\n\r\nNo. If I understand (and that's a big if) the design of draft-ietf-webtrans-http3-00 requires\r\n\r\nstep 1) use extended  CONNECT on client bidi stream to create a WebTransport session\r\n\r\nstep 2) create WebTransport stream on different client bidi stream using WEBTRANSPORT_STREAM frame https://tools.ietf.org/html/draft-ietf-webtrans-http3-00#section-4.2\r\n\r\nMy suggestion wasn't about retiring WebTransport sessions, but retiring streams robustly at the application layer. If you created a stream using an H3 frame, retire it with an H3 frame.\r\n\r\nAlthough we adopted draft-ietf-webtrans-http3-00, I;m not sure how much of the design is appropriate/relevant to the non-pooling constraints we have added. So i guess my current understanding could be subject to change.",
+          "createdAt": "2021-02-24T17:07:53Z",
+          "updatedAt": "2021-02-24T17:07:53Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "The current draft uses a 'TV' frame on streams created in step 2) that makes sending additional frames on those streams impossible.  I'm suggesting we could use the stream created in step 1) as a \"webtransport session control stream\", if needed.",
+          "createdAt": "2021-02-24T18:11:58Z",
+          "updatedAt": "2021-02-24T18:11:58Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "Ah yes, I overlooked that. In that case I agree",
+          "createdAt": "2021-02-24T18:16:09Z",
+          "updatedAt": "2021-02-24T18:16:09Z"
+        }
+      ]
     }
   ],
   "pulls": [
