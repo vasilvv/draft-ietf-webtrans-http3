@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-02-25T00:34:08.695312+00:00",
+  "timestamp": "2021-03-04T00:34:43.098733+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -477,7 +477,7 @@
       "labels": [],
       "body": "Http3Transport currently assumes that server-initiated bidirectional streams and datagrams can only be used for WebTransport. \r\n\r\nI suggest we prefix each server-initiated bidirectional stream and datagram with a new HTTP/3 frame type for WebTransport. This way, a future standard could define it's own frame type to run alongside WebTransport.",
       "createdAt": "2020-11-16T22:38:28Z",
-      "updatedAt": "2021-01-27T20:20:12Z",
+      "updatedAt": "2021-03-03T14:56:00Z",
       "closedAt": null,
       "comments": [
         {
@@ -514,6 +514,13 @@
           "body": "After thinking about this more, not having a stream type doesn't seem so bad to me and it does provide symmetry.\r\n\r\nStream types seem like an obvious design choice, but I believe HTTP/3 is sufficiently constrained that one could infer the stream type based on the first frame on the stream.  For example, the control stream MUST start with SETTINGS.  In retrospect, having both stream types and frame types is a bit awkward, and it likely would have been cleaner to only have frame types, but that ship has sailed.",
           "createdAt": "2021-01-15T17:19:16Z",
           "updatedAt": "2021-01-15T17:19:16Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "After having implemented this for hackathon, I can confirm that the lack of stream preface on server-bidi streams is annoying and requires special casing (I actually simulate receiving one).  Let's please add one.\r\n\r\nI took a bit of a shortcut and treated the stream preface as both a stream type AND a frame type.  After peeking at the unidirectional stream input to discover that it's WT, I let the parser run on that and treat it as a frame type, making it symmetric with the bidi case.  Is it possible to define a reserved frame type with the same value as the stream type?",
+          "createdAt": "2021-03-03T14:56:00Z",
+          "updatedAt": "2021-03-03T14:56:00Z"
         }
       ]
     },
@@ -609,9 +616,17 @@
       "labels": [],
       "body": "I believe the QUIC WG decided that TV frames were fine in extensions, but that we weren't going to use them in the core spec?  Others disagreed with my recollection/understanding.\r\n\r\nSubsequent discussion from Lucas and Alan indicated that TV frames are not allowed in HTTP/3, but it is allowed to have a 0 length frame which indicated the rest of the stream was WebTransport data.  I'm not sure it matters, since either way a peer which doesn't understand the frame is going to parse the stream.  Those that skip the frame will start parsing another frame after it and the parser will enter an unknown state.  Similarly, the behavior for TV is going to be unexpected/unknown.\r\n\r\n_Originally posted by @ianswett in https://github.com/vasilvv/webtransport/issues/24#issuecomment-760704522_\r\n\r\n",
       "createdAt": "2021-01-27T19:55:20Z",
-      "updatedAt": "2021-01-27T20:01:04Z",
+      "updatedAt": "2021-03-03T15:03:31Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "I had forgotten that at some point H3 removed the restriction on zero-length DATA frames.  That doesn't prevent an extension from frame using length 0 to indicate the remainder of the stream is unframed however.  I think my implementation would be  easier if we used 0 length, but I've made it work with TV frames and can live with it.\r\n\r\nAnother argument for having a length here is if this extension were to allow an optional header block or other variable length field at the beginning of a WT stream, there's currently no way to know how long it is.",
+          "createdAt": "2021-03-03T15:03:31Z",
+          "updatedAt": "2021-03-03T15:03:31Z"
+        }
+      ]
     },
     {
       "number": 27,
@@ -801,6 +816,22 @@
           "updatedAt": "2021-02-24T18:16:09Z"
         }
       ]
+    },
+    {
+      "number": 32,
+      "id": "MDU6SXNzdWU4MjEzMjUzNjc=",
+      "title": "Specify behavior when receiving a bad session ID",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/32",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The H3 draft is light on error handling guidance.  There are number of cases for bad session IDs:\r\n\r\n1. The session ID is not a client initiated bidirectional stream ID\r\n2. The session ID refers to a stream that did not perform a WebTransport handshake\r\n3. The session ID refers to a stream that has been closed or reset\r\n\r\nPresumably there is no error when a DATAGRAM arrives with a bad session id -- you just drop it?\r\n\r\nFor streams, perhaps HTTP_ID_ERROR is appropriate?\r\n\r\nIssues #28 and #29 both refer to cases where you receive a session ID that has not been created yet.  Best to keep the discussion there, but it's likely we want to allow clients/servers to buffer some of these at their own discretion rather than require an error.",
+      "createdAt": "2021-03-03T17:29:06Z",
+      "updatedAt": "2021-03-03T17:29:06Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
