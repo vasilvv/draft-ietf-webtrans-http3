@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-03-04T00:34:43.098733+00:00",
+  "timestamp": "2021-03-07T00:37:22.145580+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -42,6 +42,11 @@
       "name": "wontfix",
       "description": "This will not be worked on",
       "color": "ffffff"
+    },
+    {
+      "name": "pooling",
+      "description": "Issues related to pooling multiple WebTransports together",
+      "color": "7C45A1"
     }
   ],
   "issues": [
@@ -443,10 +448,12 @@
       "author": "kixelated",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "pooling"
+      ],
       "body": "Note that all of the below works when you swap \"server\" and \"client\". I wanted to focus on a poor Javascript client implementation, but it's equally possible to run into these cases with a poor server implementation.\r\n\r\nLet's say that you have a Http3Transport session that shares a connection with HTTP/3 or another Http3Transport session.\u00a0\r\n\r\n\r\n### MAX_DATA\r\nThe client has limited buffer space and hypothetically advertises MAX_DATA of 1MB for the connection. If the server pushes 1MB of unprocessed data over a Http3Transport session, then it will prevent the server from sending data over the connection,\u00a0including HTTP/3 responses and other Http3Transport sessions.\r\n\r\nThis can occur if the application does not accept all remote-created streams or does not fully read every stream. This will be VERY easy for a developer to mess up. It can also occur if the application can not process data faster than it is received.\r\n\r\nIn my case, the server creates unidirectional streams and pushes a large amount of media over them. The flow control limit would be hit if the Javascript application:\r\n\r\n- Only accepts bidirectional streams (ex. initialization)\r\n- Does not accept a unidirectional stream (ex. error or teardown)\r\n- Does not fully read or abort every stream (ex. parsing error)\r\n- Is not able to parse the media fast enough (ex. underpowered).\r\n\r\nThis is mostly intended behavior, otherwise these \"bugs\" would cause unbounded memory usage. However, the blast radius is bigger when sharing a connection.\u00a0\r\n\r\nIn my use-case, hitting the flow control limit would also block any HTTP/3 RPC calls or unrelated traffic on the connection. This introduces more scenarios for the connection to\u00a0become deadlocked or generally stalled.\r\n\r\n### MAX_STREAMS\r\nHTTP/3 implementations use MAX_STREAMS to limit the number of simultaneous requests. This use-case no longer works when sharing a connection with a Http3Transport session, and HTTP/3 implementations must instead return explicit error status codes when this threshold\u00a0is reached.\r\n\r\nThe same issues with MAX_DATA also apply to MAX_STREAMS. A Javascript application that fails to accept or read/abort every stream will consume flow control resources. This can manifest itself in strange ways, such as HTTP/3 being unable to create control streams, or simply being unable to create new request streams.",
       "createdAt": "2020-11-16T22:25:19Z",
-      "updatedAt": "2020-11-16T23:57:17Z",
+      "updatedAt": "2021-03-05T15:43:24Z",
       "closedAt": null,
       "comments": [
         {
@@ -477,7 +484,7 @@
       "labels": [],
       "body": "Http3Transport currently assumes that server-initiated bidirectional streams and datagrams can only be used for WebTransport. \r\n\r\nI suggest we prefix each server-initiated bidirectional stream and datagram with a new HTTP/3 frame type for WebTransport. This way, a future standard could define it's own frame type to run alongside WebTransport.",
       "createdAt": "2020-11-16T22:38:28Z",
-      "updatedAt": "2021-03-03T14:56:00Z",
+      "updatedAt": "2021-03-05T22:22:16Z",
       "closedAt": null,
       "comments": [
         {
@@ -521,6 +528,13 @@
           "body": "After having implemented this for hackathon, I can confirm that the lack of stream preface on server-bidi streams is annoying and requires special casing (I actually simulate receiving one).  Let's please add one.\r\n\r\nI took a bit of a shortcut and treated the stream preface as both a stream type AND a frame type.  After peeking at the unidirectional stream input to discover that it's WT, I let the parser run on that and treat it as a frame type, making it symmetric with the bidi case.  Is it possible to define a reserved frame type with the same value as the stream type?",
           "createdAt": "2021-03-03T14:56:00Z",
           "updatedAt": "2021-03-03T14:56:00Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Given HTTP/3 does not have a stream type varint for bidi streams, I think a potential way forward is to say that the first frame on the bidi stream can indicate the 'type' of the stream, but that there is no explicit type identifier on the wire.\r\n\r\n   _Feel free to ignore the below comment, as it's apparently unchanged from January_\r\nLooking back, SETTINGS is required to be the first frame on the control stream, so the control stream type is a bit redundant and the same is true for QPACK and I believe could be true for server push?  Obviously we're not going to redesign HTTP/3 stream and frame types at this stage in the process, but making bidi streams consistent for both perspectives seems preferable to me.",
+          "createdAt": "2021-03-05T22:20:46Z",
+          "updatedAt": "2021-03-05T22:22:16Z"
         }
       ]
     },
@@ -529,15 +543,15 @@
       "id": "MDU6SXNzdWU3ODYzNjg1Mzc=",
       "title": "Http3Transport Unidirectional Streams section is unclear",
       "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/24",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "It talks about the HTTP/3 control stream, which doesn't seem very relevant to establishing new unidirectional streams for WebTransport.\r\n\r\nAlso, I'm unclear on why the HTTP/3 frame type is 54, instead of 41 like the client initiated bidi streams.  Could all WebTransport streams not use a single HTTP/3 frame type?\r\n\r\nhttps://github.com/vasilvv/webtransport/blob/master/draft-vvv-webtransport-http3.md#unidirectional-streams",
       "createdAt": "2021-01-14T21:55:06Z",
-      "updatedAt": "2021-01-27T20:01:33Z",
-      "closedAt": null,
+      "updatedAt": "2021-03-05T16:04:45Z",
+      "closedAt": "2021-03-05T16:04:45Z",
       "comments": [
         {
           "author": "afrind",
@@ -601,6 +615,13 @@
           "body": "I split off the TV vs TLV with 0 length question into https://github.com/vasilvv/webtransport/issues/26",
           "createdAt": "2021-01-27T20:01:33Z",
           "updatedAt": "2021-01-27T20:01:33Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Stream types were referred to as control stream types in older versions of HTTP/3 draft, hence the name.  I fixed this a while ago, so closing this.",
+          "createdAt": "2021-03-05T16:04:45Z",
+          "updatedAt": "2021-03-05T16:04:45Z"
         }
       ]
     },
@@ -640,7 +661,7 @@
       "labels": [],
       "body": "An HTTP/3 server needs the ability to gracefully drain existing connections. For HTTP/3, this involves sending a GOAWAY frame indicating that future requests should use a new HTTP/3 connection. However, the behavior of GOAWAY is partially undefined with WebTransport sessions. \r\n\r\nAfter receiving a GOAWAY, the client is no longer able to make new CONNECT requests. This means that any new WebTransport sessions will need to use a new HTTP/3 connection. This is great.\r\n\r\nHowever, it's not clear how existing sessions should behave after receiving a GOAWAY frame. Are they prohibited from creating new streams? How does this interact with the stream ID sent in the GOAWAY frame? Should the application expose the receipt of a GOAWAY to start a shutdown process?",
       "createdAt": "2021-02-04T06:47:49Z",
-      "updatedAt": "2021-02-04T17:16:04Z",
+      "updatedAt": "2021-03-05T15:32:13Z",
       "closedAt": null,
       "comments": [
         {
@@ -649,6 +670,13 @@
           "body": "Thanks for opening this issue -- it's been on my mind as well. \r\n\r\nI think it's important that we think through all the graceful draining scenarios, including when there are multiple proxies between the WT client and server, and one of the proxies initiates the drain.\r\n\r\nWe already have a use-case which requires a session to be able to create new streams after the receipt of a connection level GOAWAY.  We've been exploring using a GOAWAY with MAXINT to signal the peer to stop creating new sessions, but continuing to all new streams within existing sessions.  I don't think this totally jives with the definition of GOAWAY in the H3 spec, and I don't think it would work if there were 3 or more intermediaries.\r\n\r\nWhat would happen if WebTransport defined a GOAWAY frame that could be sent on the CONNECT stream to signal the intent to drain a session, but not the connection?",
           "createdAt": "2021-02-04T17:16:03Z",
           "updatedAt": "2021-02-04T17:16:03Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think we should inform application of GOAWAY signal, and possibly add a GOAWAY on the CONNECT stream for intermediation between proxies.",
+          "createdAt": "2021-03-05T15:32:13Z",
+          "updatedAt": "2021-03-05T15:32:13Z"
         }
       ]
     },
@@ -664,7 +692,7 @@
       "labels": [],
       "body": "> From the client's perspective, a WebTransport session is established when the client receives a 200 response. From the server's perspective, a session is established once it sends a 200 response. Both endpoints MUST NOT open any streams or send any datagrams on a given session before that session is established.\r\n\r\nAfter the client initiates the WebTransport session by sending a CONNECT request, the server sends a 200 response and is free to create streams. This means that a server-initiated stream may arrive prior to the CONNECT response. Is the client able to infer that the session was successfully established, or does the client need to buffer this stream until it receives a proper response?",
       "createdAt": "2021-02-04T23:01:59Z",
-      "updatedAt": "2021-02-04T23:18:23Z",
+      "updatedAt": "2021-03-05T15:36:49Z",
       "closedAt": null,
       "comments": [
         {
@@ -673,6 +701,13 @@
           "body": "Since there are no ordering guarantees across streams on the receiver side, I'd say you have to buffer until the 200 is processed.",
           "createdAt": "2021-02-04T23:18:23Z",
           "updatedAt": "2021-02-04T23:18:23Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I agree with Lucas here.  We also had a similar problem in QuicTransport (server has to buffer streams before checking the origin), and we handled it by buffering.",
+          "createdAt": "2021-03-05T15:36:49Z",
+          "updatedAt": "2021-03-05T15:36:49Z"
         }
       ]
     },
@@ -832,6 +867,262 @@
       "updatedAt": "2021-03-03T17:29:06Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 33,
+      "id": "MDU6SXNzdWU4MjIyMjk3MzU=",
+      "title": "Should WT streams be reset when the CONNECT stream terminates",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/33",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft currently states:\r\n\r\n> Upon learning about the session being terminated, the endpoint MUST stop sending new datagrams and reset all of the streams associated with the session.\r\n\r\nIt's clear that without a CONNECT stream that new streams cannot be created and datagrams cannot be sent, but WT streams that were opened for that session could continue operating normally.  This is how push streams are handled in H2 and H3 -- the push stream continues even if the associated stream is terminated.\r\n\r\nAn endpoint always has the option to reset/stop sending WT streams when the session terminates.\r\n\r\nThis is somewhat related to the graceful drain issue (#27)",
+      "createdAt": "2021-03-04T15:17:59Z",
+      "updatedAt": "2021-03-04T15:17:59Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 34,
+      "id": "MDU6SXNzdWU4MjIzMzYwMjk=",
+      "title": "Negotiation of pooling support",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/34",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The H3 draft by its nature allows for the parallel processing of multiple WT sessions and also the intermixing of normal H3 request with WT.  Server endpoints may wish to negotiate or disable this behavior.  Clients can simply choose not to do either kind of pooling if they don't want to.\r\n\r\nThere's already a PR open (#25) with a design idea.",
+      "createdAt": "2021-03-04T17:16:48Z",
+      "updatedAt": "2021-03-06T20:15:45Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "I'd like to propose a different model than the one in #25:\r\n\r\nThe server sends the maximum WebTransport Session ID, or since 0 is a valid value, it's really the minimum invalid WebTransport Session ID.\r\n\r\nTo indicate WT is not supported, server sends 0.\r\nTo allow for only 1 session ever, server sends 4, and never updates it.\r\nTo allow for only 1 session *at a time*, server sends 4, and updates it by 4 as each session closes/resets.\r\nTo allow for N parallel sessions, server sends 4 * N. and updates as sessions close/reset.\r\n\r\nThis mirrors H3 PUSH, and requires at least one more frame (MAX_WT_SESSION_ID).  Perhaps it would also require CANCEL_WT_SESSION?\r\n\r\nA client need only declare that it supports webtransport, and even that could be optional.  The server will know if it receives a CONNECT with :protocol=webtransport.",
+          "createdAt": "2021-03-04T17:18:30Z",
+          "updatedAt": "2021-03-04T17:18:30Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I wanted to have a negotiation mechanism in #25, but my conclusion after talking with @DavidSchinazi about it was that we should not do negotiation, and servers should just reject extra streams with a 400 (or maybe even a RESET_STREAM) if they ever see more sessions than they expect; meaning it's on the clients to know if they can pool or not.",
+          "createdAt": "2021-03-05T17:03:25Z",
+          "updatedAt": "2021-03-05T17:03:25Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Though we may want a more specific 4XX error code so the client knows it should retry in a non-pooled connection",
+          "createdAt": "2021-03-05T17:35:23Z",
+          "updatedAt": "2021-03-05T17:35:23Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "That's certainly a lot simpler than session credits ;)  The cost of at least an RTT for a client that tries to pool against a server that can't handle it seems somewhat high.  I guess it depends what the common client pooling strategies are and how many servers don't support pooling.",
+          "createdAt": "2021-03-05T17:42:02Z",
+          "updatedAt": "2021-03-05T17:42:02Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@afrind since it's looking like the JavaScript API will provide a way to disable pooling, I expect that the scenario of pooling-attempted-but-rejected will be quite rare, so a round trip cost should be acceptable",
+          "createdAt": "2021-03-05T18:33:56Z",
+          "updatedAt": "2021-03-05T18:33:56Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "I'm also considering use cases for WT which are not tied to the JS API.",
+          "createdAt": "2021-03-05T18:36:47Z",
+          "updatedAt": "2021-03-05T18:36:47Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@afrind that's interesting - and those use-cases won't have a similar mechanism to disable pooling? I suspect they'll need a way to get the WT server's hostname somehow, and having config properties attached to that (such as disable_pooling) could be useful?",
+          "createdAt": "2021-03-05T20:47:02Z",
+          "updatedAt": "2021-03-05T20:47:02Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "@DavidSchinazi : the opposite -- the clients may attempt pooling to servers that might or might not support it.  You can't tell from a hostname if it supports pooling.",
+          "createdAt": "2021-03-06T00:26:18Z",
+          "updatedAt": "2021-03-06T00:26:18Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@afrind how did the client get the hostname in the first place? I'm suggesting to carry pooling_support next to that.",
+          "createdAt": "2021-03-06T00:36:49Z",
+          "updatedAt": "2021-03-06T00:36:49Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "Actually, let's go back to JS for a second.  The people who write JS at Facebook are very unlikely to know if the edge server terminating their connection supports pooling, or that configuration could change over time.",
+          "createdAt": "2021-03-06T00:47:25Z",
+          "updatedAt": "2021-03-06T00:47:25Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "(I appreciate the irony of me saying this as a Googler, but) should the JS people talk to the edge people? I agree that this shouldn't fail, but it being inefficient seems reasonable - these teams should talk if they're trying to reach good performance.",
+          "createdAt": "2021-03-06T01:33:08Z",
+          "updatedAt": "2021-03-06T01:33:08Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think my main problem with `MAX_WT_SESSION_ID` is that most people who want to disallow pooling want to exclude not only other WebTransport sessions, but also general HTTP traffic.  #25 was written with that assumption in mind.",
+          "createdAt": "2021-03-06T20:15:45Z",
+          "updatedAt": "2021-03-06T20:15:45Z"
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "id": "MDU6SXNzdWU4MjIzNjEyMzg=",
+      "title": "Alignment with MASQUE/CONNECT-UDP",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/35",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "If you ignore WebTransport streams, then the base functionality of WebTransport and CONNECT-UDP+H3 DATAGRAM is virtually identical:\r\n\r\n1. Client sends a HTTP/3 CONNECT(-UDP) request to establish a session, with a unique identifier\r\n2. The lifetime of that stream establishes the lifetime of the session\r\n3. The endpoints can exchange DATAGRAMS using the session ID as the flow ID\r\n\r\nGranted there are important differences -- CONNECT-UDP has particular semantics for the receiver, and needs mechanisms for transport level extensions.  I don't think they can be completely consolidated or factored out.\r\n\r\nNegotiation and pooling support look different at this point -- there doesn't seem to be active discussion that a server endpoint should limit the number of open CONNECT-UDP sessions, or how they can be multiplexed with standard H3, but in WT it's more controversial.\r\n\r\nAre there any opportunities for better alignment here?",
+      "createdAt": "2021-03-04T17:49:56Z",
+      "updatedAt": "2021-03-04T19:01:41Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@afrind what do you mean by better alignment? In what way are CONNECT_UDP and WT3 not aligned?",
+          "createdAt": "2021-03-04T18:16:09Z",
+          "updatedAt": "2021-03-04T18:16:09Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "@DavidSchinazi : Mostly around feature negotiation and pooling support.",
+          "createdAt": "2021-03-04T18:17:30Z",
+          "updatedAt": "2021-03-04T18:17:30Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "The Session ID/Flow ID assignment is also different.  The MASQUE approach strikes me overkill in WT, so I'm not sure we'd want to use the same mechanism for both.",
+          "createdAt": "2021-03-04T18:19:26Z",
+          "updatedAt": "2021-03-04T18:19:26Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Regarding pooling, I think that is completely specific to WT3. I don't see value in controlling the ability to pool CONNECT-UDP more than we have the ability to control pooling of CONNECT or even GET. Do you have a use-case for this?\r\n\r\nRegarding feature negotiation, don't they both use HTTP headers?",
+          "createdAt": "2021-03-04T18:19:46Z",
+          "updatedAt": "2021-03-04T18:19:46Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Regarding Session ID, since WT3 needs a Datagram Flow ID regardless, I'd suggest using that as the Session ID for simplicity.",
+          "createdAt": "2021-03-04T18:20:38Z",
+          "updatedAt": "2021-03-04T18:20:38Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "@DavidSchinazi : \r\n\r\nre: pooling: it's just a bit strange to have the divergence between MASQUE (no need to limit pooling) and WT (must have strict limits on pooling).  Why is this?\r\n\r\nre: feature negotiation: I was referring to different SETTINGs/negotiation strategy up front rather than the session establishment.  CONNECT+headers is fine.\r\n\r\nre: session ID: why does WT3 need a flow-id?  It would only need one if it uses \"H3 DATAGRAM\" but right now it's using QUIC DATAGRAM.  I'm not sure H3 DATAGRAM brings much value to WT right now, but this is a good example of where we should either align, or perhaps document why we are not aligned.",
+          "createdAt": "2021-03-04T18:26:32Z",
+          "updatedAt": "2021-03-04T18:26:32Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Regarding pooling, I think WT3 is diverging from all other HTTP semantics here, not just CONNECT-UDP. I don't see why CONNECT-UDP should diverge from GET because WT3 is diverging from GET.\r\n\r\nRegarding negotiation, WT3 needs a SETTING because it changes HTTP/3 semantics (e.g., the semantics of server-initiated bidirectional streams) whereas CONNECT-UDP doesn't change HTTP/3 semantics. Note that H3-DGRAM has a SETTING because it changes the semantics of the DATAGRAM frame in h3 connections.\r\n\r\nRegarding datagram flow ID, WT3 needs a datagram flow ID in order to support multiplexing with other h3 datagram traffic, such as CONNECT-UDP. If we want WT3 to support pooling with other HTTP/3 methods (even if that's optional and disabled by default), we'll need a datagram flow ID.",
+          "createdAt": "2021-03-04T18:37:08Z",
+          "updatedAt": "2021-03-04T18:37:08Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "> Regarding datagram flow ID, WT3 needs a datagram flow ID in order to support multiplexing with other h3 datagram traffic, such as CONNECT-UDP. If we want WT3 to support pooling with other HTTP/3 methods (even if that's optional and disabled by default), we'll need a datagram flow ID.\r\n\r\nAh - if you want to multiplex WT with any *other* HTTP/3 traffic that uses H3 DATAGRAMs, then you could have collisions with Flow-IDs.  We should open a separate issue for this.",
+          "createdAt": "2021-03-04T19:01:41Z",
+          "updatedAt": "2021-03-04T19:01:41Z"
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "id": "MDU6SXNzdWU4MjIzNzA1OTU=",
+      "title": "Session layer resource management",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/36",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [
+        "pooling"
+      ],
+      "body": "QUIC manages resources, specifically streams and flow control, at the transport layer.  Since the H3 draft allows pooling, those mechanisms may be inadequate in cases where WT sessions are multiplexed with each other or standard H3.\r\n\r\nThere are two issues open tracking some different bits of this (#22/Flow Control) and (#31/~Streams), this issue is tracking whether we need to solve that by adding functionality at the WT session layer.   #27 tracks the interpretation of GOAWAY and this could also be a session level concept.\r\n\r\nThis might look like a set of frames for granting stream and flow control credit, which would presumably be a subset of the QUIC transport credit.\r\n\r\nSome arguments against this:\r\n\r\n1. Endpoints that require the resource management features of the transport can disable pooling and fall back to the transport for these.\r\n2. These problems already exist in clients that pool HTTP connections to the same server between different applications (eg: browser tabs) that are generally unaware of each other.\r\n3. \"complexity\"",
+      "createdAt": "2021-03-04T18:02:26Z",
+      "updatedAt": "2021-03-05T17:22:16Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 37,
+      "id": "MDU6SXNzdWU4MjI0MTU2Njk=",
+      "title": "QUIC DATAGRAM vs H3 DATAGRAM",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/37",
+      "state": "OPEN",
+      "author": "afrind",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "WT currently uses QUIC DATAGRAMS (eg: no Flow-Id), and does it's own demultiplexing via the session ID.  This is incompatible with multiplexing other applications that use H3 DATAGRAMs, since the Flow-ID could collide with the session ID, depending on how it is chosen.\r\n\r\nThere was some discussion of this already in a PR on victor's repo: https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/pull/21#discussion_r520160334",
+      "createdAt": "2021-03-04T19:05:23Z",
+      "updatedAt": "2021-03-05T17:24:37Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We should use whatever H3 DATAGRAM draft decides in order to be able to coexist with MASQUE.  I've mostly not updated the draft because I don't think there is an exact consensus for H3 DATAGRAM on the exact approach.",
+          "createdAt": "2021-03-05T17:24:37Z",
+          "updatedAt": "2021-03-05T17:24:37Z"
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "id": "MDU6SXNzdWU4MjM3MzA4MTU=",
+      "title": "URI scheme identifying WebTransport over HTTP",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/38",
+      "state": "OPEN",
+      "author": "vasilvv",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We need to pick one.  The main two options are `https:` and `wt:`.\r\n\r\nWe've discussed this separately within W3C (see w3c/webtransport#198), and the conclusion there was that it would make more sense to just use `https:` URIs.  We should discuss this at the upcoming IETF meeting.",
+      "createdAt": "2021-03-06T19:40:57Z",
+      "updatedAt": "2021-03-06T21:57:08Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "(No hats) I think using https would be the simplest option here, so I'd be inclined to go with that",
+          "createdAt": "2021-03-06T21:57:08Z",
+          "updatedAt": "2021-03-06T21:57:08Z"
+        }
+      ]
     }
   ],
   "pulls": [
