@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-03-07T00:37:22.145580+00:00",
+  "timestamp": "2021-03-09T00:35:24.728843+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -484,7 +484,7 @@
       "labels": [],
       "body": "Http3Transport currently assumes that server-initiated bidirectional streams and datagrams can only be used for WebTransport. \r\n\r\nI suggest we prefix each server-initiated bidirectional stream and datagram with a new HTTP/3 frame type for WebTransport. This way, a future standard could define it's own frame type to run alongside WebTransport.",
       "createdAt": "2020-11-16T22:38:28Z",
-      "updatedAt": "2021-03-05T22:22:16Z",
+      "updatedAt": "2021-03-08T23:57:38Z",
       "closedAt": null,
       "comments": [
         {
@@ -535,6 +535,13 @@
           "body": "Given HTTP/3 does not have a stream type varint for bidi streams, I think a potential way forward is to say that the first frame on the bidi stream can indicate the 'type' of the stream, but that there is no explicit type identifier on the wire.\r\n\r\n   _Feel free to ignore the below comment, as it's apparently unchanged from January_\r\nLooking back, SETTINGS is required to be the first frame on the control stream, so the control stream type is a bit redundant and the same is true for QPACK and I believe could be true for server push?  Obviously we're not going to redesign HTTP/3 stream and frame types at this stage in the process, but making bidi streams consistent for both perspectives seems preferable to me.",
           "createdAt": "2021-03-05T22:20:46Z",
           "updatedAt": "2021-03-05T22:22:16Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  There seems to be a general agreement that we should make server-initiated bidi streams use the same encoding as client-initiated ones (that is to say, frames).  There was some interest expressed in splitting definition of server-initiated bidi streams into their own draft; @aboba and @DavidSchinazi are to reach out to httpbis about the appropriate venue for that.",
+          "createdAt": "2021-03-08T23:57:37Z",
+          "updatedAt": "2021-03-08T23:57:37Z"
         }
       ]
     },
@@ -637,7 +644,7 @@
       "labels": [],
       "body": "I believe the QUIC WG decided that TV frames were fine in extensions, but that we weren't going to use them in the core spec?  Others disagreed with my recollection/understanding.\r\n\r\nSubsequent discussion from Lucas and Alan indicated that TV frames are not allowed in HTTP/3, but it is allowed to have a 0 length frame which indicated the rest of the stream was WebTransport data.  I'm not sure it matters, since either way a peer which doesn't understand the frame is going to parse the stream.  Those that skip the frame will start parsing another frame after it and the parser will enter an unknown state.  Similarly, the behavior for TV is going to be unexpected/unknown.\r\n\r\n_Originally posted by @ianswett in https://github.com/vasilvv/webtransport/issues/24#issuecomment-760704522_\r\n\r\n",
       "createdAt": "2021-01-27T19:55:20Z",
-      "updatedAt": "2021-03-03T15:03:31Z",
+      "updatedAt": "2021-03-08T23:59:11Z",
       "closedAt": null,
       "comments": [
         {
@@ -646,6 +653,13 @@
           "body": "I had forgotten that at some point H3 removed the restriction on zero-length DATA frames.  That doesn't prevent an extension from frame using length 0 to indicate the remainder of the stream is unframed however.  I think my implementation would be  easier if we used 0 length, but I've made it work with TV frames and can live with it.\r\n\r\nAnother argument for having a length here is if this extension were to allow an optional header block or other variable length field at the beginning of a WT stream, there's currently no way to know how long it is.",
           "createdAt": "2021-03-03T15:03:31Z",
           "updatedAt": "2021-03-03T15:03:31Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  General agreement in the room was that we don't need length at all, as any parser unaware of WebTransport frames would not be able to parse those streams correctly anyways.",
+          "createdAt": "2021-03-08T23:59:10Z",
+          "updatedAt": "2021-03-08T23:59:10Z"
         }
       ]
     },
@@ -692,7 +706,7 @@
       "labels": [],
       "body": "> From the client's perspective, a WebTransport session is established when the client receives a 200 response. From the server's perspective, a session is established once it sends a 200 response. Both endpoints MUST NOT open any streams or send any datagrams on a given session before that session is established.\r\n\r\nAfter the client initiates the WebTransport session by sending a CONNECT request, the server sends a 200 response and is free to create streams. This means that a server-initiated stream may arrive prior to the CONNECT response. Is the client able to infer that the session was successfully established, or does the client need to buffer this stream until it receives a proper response?",
       "createdAt": "2021-02-04T23:01:59Z",
-      "updatedAt": "2021-03-05T15:36:49Z",
+      "updatedAt": "2021-03-09T00:00:48Z",
       "closedAt": null,
       "comments": [
         {
@@ -708,6 +722,13 @@
           "body": "I agree with Lucas here.  We also had a similar problem in QuicTransport (server has to buffer streams before checking the origin), and we handled it by buffering.",
           "createdAt": "2021-03-05T15:36:49Z",
           "updatedAt": "2021-03-05T15:36:49Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  There were no objections to buffering (with some limits), so I think we should go ahead and add it.",
+          "createdAt": "2021-03-09T00:00:48Z",
+          "updatedAt": "2021-03-09T00:00:48Z"
         }
       ]
     },
@@ -723,7 +744,7 @@
       "labels": [],
       "body": "For a simple application that wants to send \"hello world\" over a WebTransport stream, it would take a minimum of 2.5 round trips for the data to arrive on the server. This is still an improvement over WebSockets but I'm wondering if we could do better.\r\n\r\n> From the client's perspective, a WebTransport session is established when the client receives a 200 response. From the server's perspective, a session is established once it sends a 200 response. Both endpoints MUST NOT open any streams or send any datagrams on a given session before that session is established.\r\n\r\nIf the client is able to create streams prior to receiving the CONNECT response, then it would remove a round trip. The server would need to buffer any data received on streams associated with an unknown WebTransport session. If the server responds with a non-200 status code, then these streams are discarded.\r\n\r\n> WebTransport over HTTP/3 does not support 0-RTT.\r\n\r\nI believe 0-RTT is disabled for WebTransport because CONNECT is not idempotent and would be subject to replay attacks. An idempotent CONNECT would remove a round trip when 0-RTT is used... although I'm not sure this is a good idea.",
       "createdAt": "2021-02-04T23:21:57Z",
-      "updatedAt": "2021-02-04T23:28:01Z",
+      "updatedAt": "2021-03-09T00:00:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -739,6 +760,13 @@
           "body": "The client requirement is odd in comparison to MASQUE / CONNECT-UDP which says \"client can risk sending datagrams before getting a 200 response, a different response means that datagrams will be discarded\". \r\n\r\nWhat is the motivation for the requirement in WebTransport? If you need some kind of ordering guarantees, then stream IDs provide that.",
           "createdAt": "2021-02-04T23:28:01Z",
           "updatedAt": "2021-02-04T23:28:01Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  There were no objections to buffering (with some limits), so I think we should go ahead and add it.",
+          "createdAt": "2021-03-09T00:00:55Z",
+          "updatedAt": "2021-03-09T00:00:55Z"
         }
       ]
     },
@@ -880,9 +908,17 @@
       "labels": [],
       "body": "The draft currently states:\r\n\r\n> Upon learning about the session being terminated, the endpoint MUST stop sending new datagrams and reset all of the streams associated with the session.\r\n\r\nIt's clear that without a CONNECT stream that new streams cannot be created and datagrams cannot be sent, but WT streams that were opened for that session could continue operating normally.  This is how push streams are handled in H2 and H3 -- the push stream continues even if the associated stream is terminated.\r\n\r\nAn endpoint always has the option to reset/stop sending WT streams when the session terminates.\r\n\r\nThis is somewhat related to the graceful drain issue (#27)",
       "createdAt": "2021-03-04T15:17:59Z",
-      "updatedAt": "2021-03-04T15:17:59Z",
+      "updatedAt": "2021-03-09T00:02:08Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  We should keep the current behavior for now, and revisit once we have more implementation experience.",
+          "createdAt": "2021-03-09T00:02:08Z",
+          "updatedAt": "2021-03-09T00:02:08Z"
+        }
+      ]
     },
     {
       "number": 34,
@@ -896,7 +932,7 @@
       "labels": [],
       "body": "The H3 draft by its nature allows for the parallel processing of multiple WT sessions and also the intermixing of normal H3 request with WT.  Server endpoints may wish to negotiate or disable this behavior.  Clients can simply choose not to do either kind of pooling if they don't want to.\r\n\r\nThere's already a PR open (#25) with a design idea.",
       "createdAt": "2021-03-04T17:16:48Z",
-      "updatedAt": "2021-03-06T20:15:45Z",
+      "updatedAt": "2021-03-08T17:47:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -982,6 +1018,20 @@
           "body": "I think my main problem with `MAX_WT_SESSION_ID` is that most people who want to disallow pooling want to exclude not only other WebTransport sessions, but also general HTTP traffic.  #25 was written with that assumption in mind.",
           "createdAt": "2021-03-06T20:15:45Z",
           "updatedAt": "2021-03-06T20:15:45Z"
+        },
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "Ok, MAX_WT_SESSION_ID doesn't handle that case, so it may be an over-engineered solution to the wrong problem.\r\n",
+          "createdAt": "2021-03-08T15:32:01Z",
+          "updatedAt": "2021-03-08T15:32:01Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "body": "As I said in the meeting, I don't think that we should have any signals for dedicated connections from either client or server.\r\n\r\nYutaka made the point that the client can decide to make a connection dedicated after seeing the server settings.  It doesn't need to signal its intent (and signaling would have negative privacy consequences potentially).  I agree with this observation.\r\n\r\nA server needs to support HTTP if we're using HTTP.  So pooling with h3 is already a settled matter.  If the server doesn't want to answer requests, it can use 406 or 421 or other HTTP mechanisms to tell the client to go away.  More generally, the server can just not provide links to that server, such that it might have to respond to GET/OPTIONS/POST/etc.  The question then becomes managing resource limits on the server.  Having a way to limit the number of WebTransport sessions is a good thing and I believe that will be sufficient for this.\r\n\r\nThus, I'm a supported of option 3: MAX_WT_SESSIONS or similar.\r\n\r\n",
+          "createdAt": "2021-03-08T17:47:15Z",
+          "updatedAt": "2021-03-08T17:47:15Z"
         }
       ]
     },
@@ -1112,7 +1162,7 @@
       "labels": [],
       "body": "We need to pick one.  The main two options are `https:` and `wt:`.\r\n\r\nWe've discussed this separately within W3C (see w3c/webtransport#198), and the conclusion there was that it would make more sense to just use `https:` URIs.  We should discuss this at the upcoming IETF meeting.",
       "createdAt": "2021-03-06T19:40:57Z",
-      "updatedAt": "2021-03-06T21:57:08Z",
+      "updatedAt": "2021-03-09T00:02:37Z",
       "closedAt": null,
       "comments": [
         {
@@ -1121,6 +1171,13 @@
           "body": "(No hats) I think using https would be the simplest option here, so I'd be inclined to go with that",
           "createdAt": "2021-03-06T21:57:08Z",
           "updatedAt": "2021-03-06T21:57:08Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussed at IETF 110.  Consensus in the room was for using `https:`.",
+          "createdAt": "2021-03-09T00:02:37Z",
+          "updatedAt": "2021-03-09T00:02:37Z"
         }
       ]
     }
