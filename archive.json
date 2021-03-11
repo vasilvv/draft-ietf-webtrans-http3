@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-03-09T00:35:24.728843+00:00",
+  "timestamp": "2021-03-11T00:35:34.310516+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -932,7 +932,7 @@
       "labels": [],
       "body": "The H3 draft by its nature allows for the parallel processing of multiple WT sessions and also the intermixing of normal H3 request with WT.  Server endpoints may wish to negotiate or disable this behavior.  Clients can simply choose not to do either kind of pooling if they don't want to.\r\n\r\nThere's already a PR open (#25) with a design idea.",
       "createdAt": "2021-03-04T17:16:48Z",
-      "updatedAt": "2021-03-08T17:47:15Z",
+      "updatedAt": "2021-03-09T11:19:24Z",
       "closedAt": null,
       "comments": [
         {
@@ -1029,9 +1029,9 @@
         {
           "author": "martinthomson",
           "authorAssociation": "NONE",
-          "body": "As I said in the meeting, I don't think that we should have any signals for dedicated connections from either client or server.\r\n\r\nYutaka made the point that the client can decide to make a connection dedicated after seeing the server settings.  It doesn't need to signal its intent (and signaling would have negative privacy consequences potentially).  I agree with this observation.\r\n\r\nA server needs to support HTTP if we're using HTTP.  So pooling with h3 is already a settled matter.  If the server doesn't want to answer requests, it can use 406 or 421 or other HTTP mechanisms to tell the client to go away.  More generally, the server can just not provide links to that server, such that it might have to respond to GET/OPTIONS/POST/etc.  The question then becomes managing resource limits on the server.  Having a way to limit the number of WebTransport sessions is a good thing and I believe that will be sufficient for this.\r\n\r\nThus, I'm a supported of option 3: MAX_WT_SESSIONS or similar.\r\n\r\n",
+          "body": "As I said in the meeting, I don't think that we should have any signals for dedicated connections from either client or server.\r\n\r\nYutaka made the point that the client can decide to make a connection dedicated after seeing the server settings.  It doesn't need to signal its intent (and signaling would have negative privacy consequences potentially).  I agree with this observation.\r\n\r\nA server needs to support HTTP if we're using HTTP.  So pooling with h3 is already a settled matter.  If the server doesn't want to answer requests, it can use 406 or 421 or other HTTP mechanisms to tell the client to go away.  More generally, the server can just not provide links to that server, such that it might have to respond to GET/OPTIONS/POST/etc.  The question then becomes managing resource limits on the server.  Having a way to limit the number of WebTransport sessions is a good thing and I believe that will be sufficient for this.\r\n\r\nThus, I'm a supporter of option 3: MAX_WT_SESSIONS or similar.",
           "createdAt": "2021-03-08T17:47:15Z",
-          "updatedAt": "2021-03-08T17:47:15Z"
+          "updatedAt": "2021-03-09T11:19:24Z"
         }
       ]
     },
