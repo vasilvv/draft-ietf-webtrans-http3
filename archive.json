@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-03-25T00:28:20.506067+00:00",
+  "timestamp": "2021-03-28T00:53:04.881997+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -1185,6 +1185,44 @@
           "body": "Discussed at IETF 110.  Consensus in the room was for using `https:`.",
           "createdAt": "2021-03-09T00:02:37Z",
           "updatedAt": "2021-03-09T00:02:37Z"
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "id": "MDU6SXNzdWU4NDI1MDI3MTY=",
+      "title": "SETTINGS_ENABLE_WEBTRANSPORT from the client",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/39",
+      "state": "OPEN",
+      "author": "vasilvv",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "How necessary is to wait for SETTINGS_ENABLE_WEBTRANSPORT from the client?  If we are a server, and we receive a request with `:protocol` set to `webtransport`, this seems like a pretty solid indication of support.  From the current language in the draft, though, the server has to pause the processing of the request in question until the SETTINGS are there (which is really annoying to implement).\r\n\r\nOne counterpoint I can see is that we could use settings to negotiate a specific version of WebTransport over HTTP/3, and in that case we *do* need to wait for settings from both parties.",
+      "createdAt": "2021-03-27T13:18:06Z",
+      "updatedAt": "2021-03-27T18:19:10Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I really do not like the idea of delaying the processing of requests on the server side, as it seems bug/attack prone.\r\n\r\nGiven the client has to initiate the webtransport session, and there's no guarantee the client's SETTINGs will arrive before the servers(without something like ALPS), why not only have the server send the setting?  For example, websockets in H2 only requires a setting from server to client.",
+          "createdAt": "2021-03-27T15:08:33Z",
+          "updatedAt": "2021-03-27T15:08:33Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "One tricky thing here is that whatever we do here, it has to also work with the H3_DATAGRAM setting.",
+          "createdAt": "2021-03-27T16:40:20Z",
+          "updatedAt": "2021-03-27T16:40:20Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'd suggest adding some requirements like:\r\n1) The server MUST indicate support for both WebTransport and H3 datagram, or the connection MUST be closed.\r\n2) The server MUST assume that if the client uses protocol \"webtransport\", that it supports both WebTransport and H3 datagram, and sending the SETTING is optional.\r\n\r\nBut you make a good point that this could crop up in CONNECT-UDP and a few other uses of H3-Datagram.  If the client is always responsible for initiating the datagram flow(s), then the SETTING for h3-datagram only needs to be sent server to client.",
+          "createdAt": "2021-03-27T18:16:00Z",
+          "updatedAt": "2021-03-27T18:19:10Z"
         }
       ]
     }
