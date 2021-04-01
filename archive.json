@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-03-28T00:53:04.881997+00:00",
+  "timestamp": "2021-04-01T00:54:19.803300+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -1223,6 +1223,182 @@
           "body": "I'd suggest adding some requirements like:\r\n1) The server MUST indicate support for both WebTransport and H3 datagram, or the connection MUST be closed.\r\n2) The server MUST assume that if the client uses protocol \"webtransport\", that it supports both WebTransport and H3 datagram, and sending the SETTING is optional.\r\n\r\nBut you make a good point that this could crop up in CONNECT-UDP and a few other uses of H3-Datagram.  If the client is always responsible for initiating the datagram flow(s), then the SETTING for h3-datagram only needs to be sent server to client.",
           "createdAt": "2021-03-27T18:16:00Z",
           "updatedAt": "2021-03-27T18:19:10Z"
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "id": "MDU6SXNzdWU4NDQ4MDE3NDY=",
+      "title": "RESET_STREAM error codes",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/40",
+      "state": "OPEN",
+      "author": "vasilvv",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "If we are going to let the API users supply their own stream reset code, we should figure out how this is represented on the wire.  We could potentially use the error codes as-is and say they mean different things for WebTransport streams than what they mean for normal streams, but I am not sure this is sound as we don't always know that a stream is a WebTransport stream at the time we process the reset (also this sounds like a pain to implement).\r\n\r\nOne possibility would be to reserve a block within HTTP/3 error code space.  However, since HTTP/3 error codes contain GREASE code-points throughout, we might end up having to \"de-grease\" and \"re-grease\" them as the largest continuous block only has 255 codepoints available.\r\n\r\nAlternatively, if we decide to just send RESET_STREAM as a part of CONNECT stream due to issues in #31, we could just send the error code there, and keep one single code for user-initiated termination.\r\n\r\nWhatever we decide here should probably work for H/2 as well.\r\n\r\ncc @martinthomson",
+      "createdAt": "2021-03-30T16:06:50Z",
+      "updatedAt": "2021-03-31T00:50:51Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Are application developers asking for custom reset error codes? Making reset unreliable and non-customizable would be much easier if that's sufficient for everyone's needs.",
+          "createdAt": "2021-03-30T16:09:20Z",
+          "updatedAt": "2021-03-30T16:09:20Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Reset error codes are special in the sense that they are reliably delivered by the transport (unlike the data, which all can be lost to a reset).  So I imagine an application would want to be able to tell apart a regular reset (e.g. due to stream TTL expiring), vs reset due to an error.\r\n\r\n@kixelated might have opinions on this, since he filed #31.",
+          "createdAt": "2021-03-30T16:24:22Z",
+          "updatedAt": "2021-03-30T16:24:22Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "We went through a concerted effort to reduce the number of H3 error codes. Partly because knowing when to use the right code (from an implementation persepctive) can be hard. \r\n\r\nH2's space is small, I don't know if the experts would allow one application to reserve a large block.\r\n\r\nAt a minimum we probably need a WEBTRANS_NO_ERROR. Maybe there are some error codes for \"Web transport wire protocol error\". Anticipating more specific error codes for apps using webtransport is hard. Some motivating use cases might help. ",
+          "createdAt": "2021-03-30T16:58:48Z",
+          "updatedAt": "2021-03-30T16:58:48Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> H2's space is small, I don't know if the experts would allow one application to reserve a large block.\r\n\r\nIt's 32-bit, so I think we could probably get 16 bits worth of error codes.",
+          "createdAt": "2021-03-30T17:36:54Z",
+          "updatedAt": "2021-03-30T17:36:54Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "Ah quire right, I was getting mixed up with frame type which is 8 bits. But still, reserving half the code points for one usage of H2 seems overboard. \r\n\r\nGiven that H2 suffices with about a dozen error codes I really wonder what WebTransport thinks it can achieve by using so many. Maybe the ask is for a \"retire stream with a status\"? In which case an alternate design would be to add a control frame for webstransport that contains your own space or possibly a reason phrasr and then a generic error code such as WEBTRANS_STREAM_ABORT to disambiguate it from other H3 errors.",
+          "createdAt": "2021-03-30T17:50:25Z",
+          "updatedAt": "2021-03-30T17:50:25Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think it's 1/65536th of the error space, not 1/2.\r\n\r\nWebTransport *by itself* does not need that many error codes (I have so far three or four in the code that I will write a PR as soon as I'm done); the question here is what do applications running on top of it want.",
+          "createdAt": "2021-03-30T17:59:59Z",
+          "updatedAt": "2021-03-30T17:59:59Z"
+        },
+        {
+          "author": "kixelated",
+          "authorAssociation": "NONE",
+          "body": "The [JS API](https://w3c.github.io/webtransport/#web-transport-close-info) exposes connection error codes, so it's something the transport would need to support. I think removing them would be a W3C conversation.\r\n\r\nActually for my application, we wanted to signal when the connection was terminated gracefully versus an unexpected error. We tried using CONNECTION_CLOSE with application error codes but the QuicTransport implementation in Chrome always raised \"Connection Lost\" regardless of the code. We had to resort to making a new stream and our own, high priority message when the connection was closed. This also meant waiting for the message to be acknowledged before actually closing the connection, otherwise the message would be lost.\r\n\r\nSo yeah, I think immediately closing a connection with an error code is useful functionality, hence why it's in QUIC as well.",
+          "createdAt": "2021-03-30T18:22:01Z",
+          "updatedAt": "2021-03-30T18:22:01Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "Would it work to just defer that the registration to applications over WebTransport? I appreciate it's nice to have a contiguous block but there's hardly much churn in that registry and I don't know what practical benefit a contiguous range adds for distinct uses of WebTransport. I'm confused if you're attempting to reserve a block that is then allocated via some sub-protocol negotiation, or if you intend to run a registration scheme inside your reserved block. Or something else.",
+          "createdAt": "2021-03-30T18:23:09Z",
+          "updatedAt": "2021-03-30T18:23:09Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Are you suggesting that we should let WebTransport applications send arbitrary HTTP/3 error codes?  That could work, but I am not sure what are the security consequences of that.  If we only reserve a block, the error codes outside of that block are \"privileged\", i.e. only the browser (but not the untrusted web application) can send them.",
+          "createdAt": "2021-03-30T18:26:27Z",
+          "updatedAt": "2021-03-30T18:26:27Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "That's a good point and puts more weight behind reserving a block that can only be used by the WebTransport API. ",
+          "createdAt": "2021-03-30T18:39:46Z",
+          "updatedAt": "2021-03-30T18:39:46Z"
+        },
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@kixelated could you elaborate on how your application reacts differently to graceful termination of a stream vs unexpected error? I'm just curious to know what you use this for.",
+          "createdAt": "2021-03-30T20:49:02Z",
+          "updatedAt": "2021-03-30T20:49:02Z"
+        },
+        {
+          "author": "kixelated",
+          "authorAssociation": "NONE",
+          "body": "> @kixelated could you elaborate on how your application reacts differently to graceful termination of a stream vs unexpected error? I'm just curious to know what you use this for.\r\n\r\nSure, we're doing live video streaming. We want to distinguish when the connection is closed because the live stream has ended (show an \"thanks for watching\" screen), versus an unexpected error (show an error screen with debug code).",
+          "createdAt": "2021-03-30T21:04:39Z",
+          "updatedAt": "2021-03-30T21:04:39Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Makes sense, though this is for an entire session (see #41).  Here we're discussing individual streams.",
+          "createdAt": "2021-03-30T21:16:30Z",
+          "updatedAt": "2021-03-30T21:16:30Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "I'm finding the mention of CONNECTION_CLOSE slightly confusing since this thread is about stream resets. \r\n\r\nThe JS API doesn't mention if CONNECTION_CLOSE is a transport-level or application-level close, it really should. \r\n\r\nThe HTTP-based WebTransports support graceful connection close via GOAWAY.\r\n\r\nApplications built on WebTransport might be able to harness these properties, or they might need to create a control channel per session that could then behave exactly how they want, without the overhead of IETF registries.\r\n\r\n",
+          "createdAt": "2021-03-30T21:19:38Z",
+          "updatedAt": "2021-03-30T21:19:38Z"
+        },
+        {
+          "author": "kixelated",
+          "authorAssociation": "NONE",
+          "body": "Oh sorry, for some reason I thought this was for the entire connection.\r\n\r\nResetting a stream with an error code is less useful, but again it's in the [JS API](https://w3c.github.io/webtransport/#dom-outgoingstream-abortwriting). RESET_STREAM is useful for my application because the streams transfer a large amount of data, which may be blocked on the network, but I don't have a use-case for application error codes at the moment.",
+          "createdAt": "2021-03-30T21:38:43Z",
+          "updatedAt": "2021-03-30T21:39:38Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "body": "Just to close the loop here.  We talked about this in the context of W3C and decided that we'd like to have some number of error code points just for web transport.  256 was the initial suggestion; 100 might work; 31 was considered too small.  @DavidSchinazi pointed out that we can play FizzBuzz and step carefully around the reserved greasing points so that a contiguous block is presented to applications even if the underlying code points are not contiguous.",
+          "createdAt": "2021-03-31T00:34:45Z",
+          "updatedAt": "2021-03-31T00:34:45Z"
+        },
+        {
+          "author": "LPardue",
+          "authorAssociation": "NONE",
+          "body": "FWIW, where I said\r\n\r\n> The JS API doesn't mention if CONNECTION_CLOSE is a transport-level or application-level close, it really should.\r\n\r\nthere is already an issue for it https://github.com/w3c/webtransport/issues/80",
+          "createdAt": "2021-03-31T00:50:51Z",
+          "updatedAt": "2021-03-31T00:50:51Z"
+        }
+      ]
+    },
+    {
+      "number": 41,
+      "id": "MDU6SXNzdWU4NDUyODA1MjY=",
+      "title": "Error codes for closing the session",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/41",
+      "state": "OPEN",
+      "author": "vasilvv",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Since the API was based off QuicTransport, the API document currently has a method to close the session, with both an error code and a reason string (modeled off QUIC CONNECTION_CLOSE): <https://w3c.github.io/webtransport/#web-transport-close-info>.\r\n\r\nWe could attempt to reset the CONNECT stream, but that would imply that it's always reset, and will not let us supply a reason string.  I think the easiest way would be to send trailers on the CONNECT stream.",
+      "createdAt": "2021-03-30T21:15:26Z",
+      "updatedAt": "2021-03-30T21:15:26Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 42,
+      "id": "MDU6SXNzdWU4NDY5Njc5NjQ=",
+      "title": "What status code should lead to creation of WebTransport session?",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/42",
+      "state": "OPEN",
+      "author": "vasilvv",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The spec currently explicitly requires `200`.  <https://tools.ietf.org/id/draft-ietf-quic-http-34.html#name-the-connect-method> suggests that any 2xx code should work.  Should we change the text accordingly?",
+      "createdAt": "2021-03-31T16:58:48Z",
+      "updatedAt": "2021-03-31T17:29:24Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "DavidSchinazi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'd suggest server MUST send 200 and client MUST accept any 2XX. That way future extensions can apply meaning to other 2XX codes.",
+          "createdAt": "2021-03-31T17:29:24Z",
+          "updatedAt": "2021-03-31T17:29:24Z"
         }
       ]
     }
