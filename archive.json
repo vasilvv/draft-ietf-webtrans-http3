@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-04-01T00:54:19.803300+00:00",
+  "timestamp": "2021-04-04T00:56:06.408635+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -1374,9 +1374,17 @@
       "labels": [],
       "body": "Since the API was based off QuicTransport, the API document currently has a method to close the session, with both an error code and a reason string (modeled off QUIC CONNECTION_CLOSE): <https://w3c.github.io/webtransport/#web-transport-close-info>.\r\n\r\nWe could attempt to reset the CONNECT stream, but that would imply that it's always reset, and will not let us supply a reason string.  I think the easiest way would be to send trailers on the CONNECT stream.",
       "createdAt": "2021-03-30T21:15:26Z",
-      "updatedAt": "2021-03-30T21:15:26Z",
+      "updatedAt": "2021-04-01T16:39:16Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "afrind",
+          "authorAssociation": "NONE",
+          "body": "If we want to allow trailers (or any non DATA frames) on the CONNECT stream, we need to add text allowing that.\r\n\r\nFrom the H3 spec:\r\n\r\nOnce the CONNECT method has completed, only DATA frames are permitted to be sent on the stream.  Extension frames MAY be used if specifically permitted by the definition of the extension.\r\n\r\n\r\nFrom: Victor Vasiliev ***@***.***>\r\nReply-To: ietf-wg-webtrans/draft-ietf-webtrans-http3 ***@***.***>\r\nDate: Tuesday, March 30, 2021 at 2:15 PM\r\nTo: ietf-wg-webtrans/draft-ietf-webtrans-http3 ***@***.***>\r\nCc: Subscribed ***@***.***>\r\nSubject: [ietf-wg-webtrans/draft-ietf-webtrans-http3] Error codes for closing the session (#41)\r\n\r\n\r\nSince the API was based off QuicTransport, the API document currently has a method to close the session, with both an error code and a reason string (modeled off QUIC CONNECTION_CLOSE): https://w3c.github.io/webtransport/#web-transport-close-info<https://w3c.github.io/webtransport/#web-transport-close-info>.\r\n\r\nWe could attempt to reset the CONNECT stream, but that would imply that it's always reset, and will not let us supply a reason string. I think the easiest way would be to send trailers on the CONNECT stream.\r\n\r\n\u2014\r\nYou are receiving this because you are subscribed to this thread.\r\nReply to this email directly, view it on GitHub<https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/41>, or unsubscribe<https://github.com/notifications/unsubscribe-auth/AB7AQ2L7XYEL7XSW5Y6TSS3TGI5P5ANCNFSM42C7NFIQ>.\r\n",
+          "createdAt": "2021-04-01T16:39:16Z",
+          "updatedAt": "2021-04-01T16:39:16Z"
+        }
+      ]
     },
     {
       "number": 42,
