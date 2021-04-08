@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-04-04T00:56:06.408635+00:00",
+  "timestamp": "2021-04-08T00:57:18.367552+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -1398,7 +1398,7 @@
       "labels": [],
       "body": "The spec currently explicitly requires `200`.  <https://tools.ietf.org/id/draft-ietf-quic-http-34.html#name-the-connect-method> suggests that any 2xx code should work.  Should we change the text accordingly?",
       "createdAt": "2021-03-31T16:58:48Z",
-      "updatedAt": "2021-03-31T17:29:24Z",
+      "updatedAt": "2021-04-06T06:50:37Z",
       "closedAt": null,
       "comments": [
         {
@@ -1407,6 +1407,13 @@
           "body": "I'd suggest server MUST send 200 and client MUST accept any 2XX. That way future extensions can apply meaning to other 2XX codes.",
           "createdAt": "2021-03-31T17:29:24Z",
           "updatedAt": "2021-03-31T17:29:24Z"
+        },
+        {
+          "author": "yutakahirano",
+          "authorAssociation": "NONE",
+          "body": "What would happen if we require client to reject 2xx other than 200?",
+          "createdAt": "2021-04-06T06:50:36Z",
+          "updatedAt": "2021-04-06T06:50:36Z"
         }
       ]
     }
