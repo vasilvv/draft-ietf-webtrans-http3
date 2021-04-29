@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-04-08T00:57:18.367552+00:00",
+  "timestamp": "2021-04-29T00:53:18.700934+00:00",
   "repo": "ietf-wg-webtrans/draft-ietf-webtrans-http3",
   "labels": [
     {
@@ -1416,6 +1416,22 @@
           "updatedAt": "2021-04-06T06:50:36Z"
         }
       ]
+    },
+    {
+      "number": 43,
+      "id": "MDU6SXNzdWU4Njg0ODI1Nzg=",
+      "title": "[Editorial] `Code` interchanged in Section 7.3 and 7.4",
+      "url": "https://github.com/ietf-wg-webtrans/draft-ietf-webtrans-http3/issues/43",
+      "state": "OPEN",
+      "author": "bashi",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "It seems that Section 7.3 should mention `Code: 0x41` and Section 7.4 should mention `Code: 0x54`.",
+      "createdAt": "2021-04-27T05:51:43Z",
+      "updatedAt": "2021-04-27T05:51:43Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
